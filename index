@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiveOS — แผนระบบสำหรับ Dive Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean-deep: #020e1a;
+    --ocean-mid: #051c2e;
+    --ocean-surface: #0a2d45;
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.15);
+    --cyan-glow: rgba(0,212,255,0.4);
+    --teal: #00ffcc;
+    --amber: #ffb300;
+    --coral: #ff6b6b;
+    --soft-mint: #7fffe0;
+    --white: #f0f8ff;
+    --muted: rgba(240,248,255,0.5);
+    --card-bg: rgba(5, 28, 46, 0.8);
+    --border: rgba(0,212,255,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ocean-deep);
+    color: var(--white);
+    font-family: 'DM Mono', 'Noto Sans Thai', 'Tahoma', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Animated ocean background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(0,80,120,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,100,140,0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(0,60,100,0.3) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 60px 0 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .logo-badge {
+    display: inline-block;
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    background: var(--cyan-dim);
+  }
+
+  h1 {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  h1 span.glow {
+    color: var(--cyan);
+    text-shadow: 0 0 40px var(--cyan-glow), 0 0 80px rgba(0,212,255,0.2);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 1px;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 48px 0;
+  }
+
+  .stat {
+    background: var(--card-bg);
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--cyan);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    letter-spacing: -0.5px;
+  }
+
+  /* PAIN POINT CARDS */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 64px;
+  }
+
+  .pain-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+    cursor: default;
+  }
+
+  .pain-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+  }
+
+  .pain-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .pain-card:hover::before { opacity: 1; }
+
+  .pain-number {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+
+  .pain-title {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pain-title .icon { font-size: 18px; }
+
+  .pain-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .pain-fix {
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--cyan);
+    line-height: 1.7;
+  }
+
+  .pain-fix strong {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
+  .severity {
+    display: inline-flex;
+    gap: 3px;
+    margin-top: 12px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .dot.on { background: var(--cyan); }
+  .dot.high { background: var(--coral); }
+  .dot.high-on { background: var(--coral); }
+
+  /* MODULES TABLE */
+  .modules-section { margin-bottom: 64px; }
+
+  .module-row {
+    display: grid;
+    grid-template-columns: 40px 200px 1fr 120px;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .module-row:hover { background: rgba(0,212,255,0.04); }
+
+  .module-row.header {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--cyan-dim);
+    padding-bottom: 12px;
+  }
+
+  .module-icon {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .module-name {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .module-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .phase-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .phase-1 { background: rgba(0,255,204,0.1); color: var(--teal); border: 1px solid rgba(0,255,204,0.3); }
+  .phase-2 { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.3); }
+  .phase-3 { background: rgba(255,179,0,0.1); color: var(--amber); border: 1px solid rgba(255,179,0,0.3); }
+
+  /* REVENUE MODEL */
+  .revenue-section { margin-bottom: 64px; }
+
+  .revenue-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .revenue-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+
+  .revenue-card:hover { border-color: var(--cyan); }
+
+  .rev-icon { font-size: 28px; margin-bottom: 12px; }
+
+  .rev-price {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cyan);
+    margin-bottom: 4px;
+  }
+
+  .rev-label {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .rev-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ROADMAP */
+  .roadmap-section { margin-bottom: 64px; }
+
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 8px; bottom: 8px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--cyan), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan-glow);
+  }
+
+  .tl-phase {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+
+  .tl-title {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .tl-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tl-tag {
+    font-size: 11px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+  }
+
+  /* MARKET */
+  .market-section { margin-bottom: 64px; }
+
+  .market-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .market-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .market-location {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .market-count {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    color: var(--cyan);
+    margin: 8px 0 4px;
+  }
+
+  .market-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .market-rev {
+    font-size: 12px;
+    color: var(--teal);
+    padding: 6px 10px;
+    background: rgba(0,255,204,0.06);
+    border-radius: 6px;
+    border: 1px solid rgba(0,255,204,0.15);
+  }
+
+  /* MOAT */
+  .moat-box {
+    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,80,120,0.2));
+    border: 1px solid var(--cyan);
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .moat-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,212,255,0.05) 0%, transparent 70%);
+  }
+
+  .moat-title {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .moat-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.9;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .moat-highlight {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  /* FOOTER CTA */
+  .cta-section {
+    text-align: center;
+    padding: 60px 0 80px;
+    border-top: 1px solid var(--border);
+  }
+
+  .cta-title {
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+  }
+
+  .cta-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--cyan);
+    color: var(--ocean-deep);
+    font-family: 'Syne', 'Noto Sans Thai', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s, transform 0.2s;
+  }
+
+  .cta-btn:hover {
+    box-shadow: 0 0 32px var(--cyan-glow);
+    transform: translateY(-2px);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .pain-grid { grid-template-columns: 1fr; }
+    .revenue-grid { grid-template-columns: 1fr; }
+    .market-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .module-row { grid-template-columns: 30px 1fr; }
+    .module-row .module-desc, .module-row .phase-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-badge">🤿 DiveOS — แผนระบบสำหรับ Dive Center</div>
+    <h1>จัดการทุกปัญหา<br><span class="glow">ในระบบเดียว</span></h1>
+    <p class="subtitle">แพลตฟอร์มบริหาร Dive Center แบบครบวงจร — สร้างจากประสบการณ์จริงของ Divemaster บนเกาะเต่า</p>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-num">8</span>
+      <span class="stat-label">ปัญหาหลัก</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">12</span>
+      <span class="stat-label">โมดูลระบบ</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">500+</span>
+      <span class="stat-label">กลุ่ม Dive Center เป้าหมาย</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">฿15k+</span>
+      <span class="stat-label">รายได้ประจำ/เดือน เมื่อมี 10 ร้าน</span>
+    </div>
+  </div>
+
+  <!-- PAIN POINTS -->
+  <div class="section-label">Pain Points</div>
+  <h2>ปัญหาที่เจอจริงทุกวัน</h2>
+
+  <div class="pain-grid">
+
+    <div class="pain-card">
+      <div class="pain-number">01</div>
+      <div class="pain-title"><span class="icon">🌊</span> เช็กอินตอนเช้าวุ่นวาย</div>
+      <div class="pain-desc">นักดำน้ำจำนวนมากมาถึงช่วง 7–8 โมงเช้า ทีมงานต้องเช็กชื่อจากกระดาษ หาเอกสาร waiver และจับคู่ไซซ์อุปกรณ์ให้ถูกคน ทุกอย่างเกิดขึ้นพร้อมกันจนเรือเกือบออกโดยที่ยังมีคนตกหล่น</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>ใส่ QR Code ในใบยืนยันการจอง → ลูกค้าเช็กอินเองเมื่อมาถึง → ถุงอุปกรณ์พร้อมชื่อรออยู่แล้ว → ใช้เวลาประมาณ 45 วินาทีต่อคน</div>
+      <div class="severity">
+        <div class="dot high-on"></div><div class="dot high-on"></div><div class="dot high-on"></div><div class="dot high-on"></div><div class="dot high-on"></div>
+        <span style="font-size:10px;color:var(--coral);margin-left:6px;">สำคัญมาก</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">02</div>
+      <div class="pain-title"><span class="icon">🚢</span> จัดที่นั่งบนเรือ</div>
+      <div class="pain-desc">ต้องรอ Boat Master มาบอกที่นั่ง และยังต้องเช็ก Dive Computer ทีละคน ทั้งใบเซอร์ แรงดันอากาศ และความลึก ทำให้ดีเลย์แทบทุกวัน</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>แผนผังที่นั่งแบบโรงหนัง ระบบช่วยจัดที่นั่งตามระดับใบเซอร์และประสบการณ์ หลังไดฟ์ DM กรอก Dive Computer ผ่านแท็บเล็ตได้ในประมาณ 10 วินาทีต่อคน</div>
+      <div class="severity">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div>
+        <span style="font-size:10px;color:var(--cyan);margin-left:6px;">สูง</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">03</div>
+      <div class="pain-title"><span class="icon">☁️</span> เปลี่ยนแผนเพราะสภาพอากาศ</div>
+      <div class="pain-desc">เมื่อสภาพอากาศเปลี่ยนและต้องเปลี่ยน Dive Site กะทันหัน ทีมงานต้องโทรหรือทักลูกค้า 15–30 คนทีละคน ใช้เวลา 1–2 ชั่วโมง และบางคนอาจไม่ได้รับข้อความ</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>กดครั้งเดียวเพื่อแจ้งลูกค้าทุกคนผ่าน LINE/WhatsApp ตารางใหม่ถูกส่งอัตโนมัติ ทุกคนรู้พร้อมกันภายใน 60 วินาที</div>
+      <div class="severity">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div>
+        <span style="font-size:10px;color:var(--cyan);margin-left:6px;">สูง</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">04</div>
+      <div class="pain-title"><span class="icon">🧳</span> ติดตามอุปกรณ์</div>
+      <div class="pain-desc">นักดำน้ำ 100 คน × อุปกรณ์ 5 ชิ้น = 500 รายการที่ต้องเคลื่อนทุกเช้า ใครใช้ไซซ์อะไร? BCD คืนหรือยัง? Regulator #12 หายไปไหน? ลูกค้าบอกว่าคืนแล้ว แต่ทีมงานเช็กไม่ได้</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>ติด QR Sticker บนอุปกรณ์ทุกชิ้น มอบหมายอุปกรณ์ใน 2 แตะ ตอนคืนก็สแกนอีกครั้ง ระบบรู้เสมอว่าอุปกรณ์อยู่กับใคร พร้อมประวัติซ่อมบำรุง</div>
+      <div class="severity">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+        <span style="font-size:10px;color:var(--cyan);margin-left:6px;">กลาง-สูง</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">05</div>
+      <div class="pain-title"><span class="icon">💵</span> บิลและการชำระเงิน</div>
+      <div class="pain-desc">ใครจ่ายแล้ว? ใครยังค้าง? กรุ๊ป 8 คนจะแยกบิลอย่างไร? เงินสด บัตร หรือชาร์จเข้าห้องพัก? ปิดยอดท้ายวันใช้เวลานาน เจ้าของอยากดูรายได้แต่ต้องรอถึงดึก</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>ทุก Booking มีสถานะการชำระเงิน แยกบิลกลุ่มได้อัตโนมัติ ปิดยอดท้ายวันในหน้าจอเดียว ผู้จัดการดูรายได้แบบ Live ได้จากทุกที่</div>
+      <div class="severity">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div>
+        <span style="font-size:10px;color:var(--cyan);margin-left:6px;">สูง</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">06</div>
+      <div class="pain-title"><span class="icon">📄</span> เอกสารและฟอร์ม</div>
+      <div class="pain-desc">ฟอร์มสุขภาพ Waiver และเอกสารความรับผิดชอบเป็นสิ่งจำเป็นทางกฎหมาย แต่การเขียนมือใช้เวลา เอกสารเปียก หาย หรือเสียหายได้ง่าย พอมี Audit ย้อนหลัง ก็หาเอกสารยาก</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>ลูกค้ากรอกฟอร์มบนมือถือผ่าน QR Link ก่อนมาถึง ระบบเก็บเป็น PDF พร้อมเวลาใน Cloud พิมพ์ได้ใน 1 แตะ และค้นย้อนหลังได้เสมอ</div>
+      <div class="severity">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div>
+        <span style="font-size:10px;color:var(--coral);margin-left:6px;">เสี่ยงด้านเอกสาร</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">07</div>
+      <div class="pain-title"><span class="icon">🆘</span> ข้อมูลฉุกเฉิน</div>
+      <div class="pain-desc">ถ้าเกิดเหตุฉุกเฉินกลางทะเล ผู้จัดการที่อยู่บนฝั่งต้องรู้ทันทีว่าใครอยู่บนเรือลำนั้น ข้อมูลผู้ติดต่อฉุกเฉินและเงื่อนไขสุขภาพไม่ควรอยู่ในกระดาษที่อาจเปียกหรือหาไม่เจอ</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>ผู้จัดการเปิดแอป → เลือก Boat B → เห็นนักดำน้ำทุกคน ใบเซอร์ สถานะสุขภาพ ผู้ติดต่อฉุกเฉิน และไดฟ์ของวันนั้น ภายใน 5 วินาที จากทุกที่</div>
+      <div class="severity">
+        <div class="dot high-on"></div><div class="dot high-on"></div><div class="dot high-on"></div><div class="dot high-on"></div><div class="dot high-on"></div>
+        <span style="font-size:10px;color:var(--coral);margin-left:6px;">ความปลอดภัยชีวิต</span>
+      </div>
+    </div>
+
+    <div class="pain-card">
+      <div class="pain-number">08</div>
+      <div class="pain-title"><span class="icon">📊</span> ไม่มีข้อมูลวิเคราะห์</div>
+      <div class="pain-desc">เจ้าของร้านไม่เห็นภาพรวมว่า Site ไหนขายดี DM คนไหนผลงานเด่น ช่วงไหนพีค อุปกรณ์เสียบ่อยแบบไหน หรือคอร์สไหน Convert ดี ทำให้ตัดสินใจโดยไม่มีข้อมูล</div>
+      <div class="pain-fix"><strong>วิธีแก้ด้วยระบบ</strong>ข้อมูลจากการทำงานประจำวันไหลเข้า Analytics อัตโนมัติ ดูรายได้ตามเรือ คอร์ส DM และ Site ได้ พร้อมเทรนด์รายเดือน โดยไม่ต้องกรอกข้อมูลเพิ่ม</div>
+      <div class="severity">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+        <span style="font-size:10px;color:var(--cyan);margin-left:6px;">กลาง</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODULES -->
+  <div class="modules-section">
+    <div class="section-label">สิ่งที่ควรสร้าง</div>
+    <h2>โมดูลระบบ</h2>
+
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div class="module-row header">
+        <div></div>
+        <div>โมดูล</div>
+        <div>ทำอะไรได้บ้าง</div>
+        <div>เฟส</div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">📅</div>
+        <div class="module-name">ตารางเรือ</div>
+        <div class="module-desc">กระดานรายวันแบบมองเห็นภาพ แยกตามเรือ กำหนดจำนวนคนสูงสุด Dive Site และ DM พร้อมพิมพ์ Morning Sheet ได้ใน 1 แตะ</div>
+        <div><span class="phase-badge phase-1">เฟส 1</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">💺</div>
+        <div class="module-name">แผนผังที่นั่ง</div>
+        <div class="module-desc">จัดที่นั่งบนเรือแบบโรงหนัง ระบบแนะนำจากใบเซอร์และประสบการณ์ ลากเพื่อสลับที่นั่งได้ ใช้งานบนแท็บเล็ตบนเรือได้ทันที</div>
+        <div><span class="phase-badge phase-1">เฟส 1</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">✅</div>
+        <div class="module-name">QR Check-in</div>
+        <div class="module-desc">ลูกค้าสแกน QR ตอนมาถึง ระบบเช็กให้ทันที: จ่ายเงินแล้ว ✅ waiver แล้ว ✅ มีเรือ ✅ มีที่นั่ง ✅ จากนั้นทีมงานส่งถุงอุปกรณ์ที่มีชื่อให้ ใช้เวลาประมาณ 45 วินาทีต่อคน</div>
+        <div><span class="phase-badge phase-1">เฟส 1</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">📣</div>
+        <div class="module-name">แจ้งเตือนกลุ่ม</div>
+        <div class="module-desc">กดครั้งเดียวเพื่อส่งอัปเดตอากาศหรือตารางไปยังลูกค้าทุกคนผ่าน LINE/WhatsApp ไม่ต้องโทรหาทีละ 30 คนอีกต่อไป</div>
+        <div><span class="phase-badge phase-1">เฟส 1</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">💵</div>
+        <div class="module-name">ระบบบิล</div>
+        <div class="module-desc">ติดตามการชำระเงินราย Booking เงินมัดจำ ยอดคงเหลือ แยกบิลกลุ่ม สรุปเงินสดท้ายวัน และ Dashboard รายได้แบบ Live</div>
+        <div><span class="phase-badge phase-1">เฟส 1</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">📄</div>
+        <div class="module-name">Digital Waivers</div>
+        <div class="module-desc">ลูกค้ากรอกฟอร์มสุขภาพและ Waiver บนมือถือ ระบบเก็บ PDF พร้อมเวลาไว้บน Cloud พิมพ์ได้ใน 1 แตะ และค้นย้อนหลังได้เสมอ</div>
+        <div><span class="phase-badge phase-2">เฟส 2</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">🤿</div>
+        <div class="module-name">บันทึก Dive Computer</div>
+        <div class="module-desc">หลังไดฟ์ DM ใส่ความลึก เวลา อากาศเข้า/ออก ของนักดำน้ำแต่ละคน ใช้เวลาประมาณ 10 วินาทีต่อคน ระบบสร้างประวัติไดฟ์และ Logbook อัตโนมัติ</div>
+        <div><span class="phase-badge phase-2">เฟส 2</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">🧳</div>
+        <div class="module-name">ติดตามอุปกรณ์</div>
+        <div class="module-desc">ติด QR บนอุปกรณ์ทุกชิ้น มอบหมายและรับคืนด้วยการสแกน ติดตามไซซ์ แจ้งสถานะเสียหาย และดูประวัติซ่อมบำรุงรายชิ้น</div>
+        <div><span class="phase-badge phase-2">เฟส 2</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">🎓</div>
+        <div class="module-name">จัดการคอร์ส</div>
+        <div class="module-desc">ติดตามความคืบหน้า OW/AOW/Rescue/DM เซ็นผ่านสกิล คะแนนทฤษฎี กรอกฟอร์ม SSI อัตโนมัติ และสร้าง Cert PDF</div>
+        <div><span class="phase-badge phase-2">เฟส 2</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">🖨️</div>
+        <div class="module-name">เอกสารสรุปหน้าเดียว</div>
+        <div class="module-desc">กดครั้งเดียว ได้เอกสารหน้าเดียวที่รวมเรือ Site รายชื่อนักดำน้ำ ระดับใบเซอร์ อุปกรณ์ สถานะจ่ายเงิน และผู้ติดต่อฉุกเฉิน</div>
+        <div><span class="phase-badge phase-2">เฟส 2</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">☁️</div>
+        <div class="module-name">Cloud Storage</div>
+        <div class="module-desc">ข้อมูลถูกเก็บบน Cloud แบบเข้ารหัส Waiver และ Cert เก็บได้ยาวนาน เจ้าของดูทุกอย่างจากมือถือได้ ส่วนทีมงานเห็นเฉพาะข้อมูลที่จำเป็น</div>
+        <div><span class="phase-badge phase-2">เฟส 2</span></div>
+      </div>
+      <div class="module-row">
+        <div class="module-icon">📈</div>
+        <div class="module-name">Analytics</div>
+        <div class="module-desc">ดูรายได้ตามเรือ DM Site และคอร์ส อัตราอุปกรณ์เสีย ช่วงพีค และ Trigger สำหรับ Upsell เมื่อครบ 50 ไดฟ์ โดยไม่ต้องกรอกข้อมูลเพิ่ม</div>
+        <div><span class="phase-badge phase-3">เฟส 3</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE MODEL -->
+  <div class="revenue-section">
+    <div class="section-label">Business Model</div>
+    <h2>โมเดลรายได้</h2>
+    <div class="revenue-grid">
+      <div class="revenue-card">
+        <div class="rev-icon">📦</div>
+        <div class="rev-price">฿1,500–5,000</div>
+        <div class="rev-label">ค่าสมาชิก SaaS รายเดือน</div>
+        <div class="rev-desc">คิดค่าบริการต่อ Dive Center ต่อเดือน ปรับตามขนาดร้าน หากมี 10 ร้าน จะมีรายได้ประจำประมาณ ฿15–50k ต่อเดือน</div>
+      </div>
+      <div class="revenue-card">
+        <div class="rev-icon">🚀</div>
+        <div class="rev-price">฿5,000–15,000</div>
+        <div class="rev-label">ค่า Setup</div>
+        <div class="rev-desc">ค่าเริ่มต้นแบบครั้งเดียว สำหรับย้ายข้อมูลเดิมและเทรนทีมงาน รับก่อนเริ่มใช้งานจริง</div>
+      </div>
+      <div class="revenue-card">
+        <div class="rev-icon">🖨️</div>
+        <div class="rev-price">฿50–150</div>
+        <div class="rev-label">ต่อใบ Cert ที่พิมพ์</div>
+        <div class="rev-desc">รับส่วนแบ่งจาก Cert Card หรือ Logbook ที่พิมพ์ผ่านระบบ เป็นรายได้เสริมแบบต่อเนื่อง</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="roadmap-section">
+    <div class="section-label">ลำดับการสร้าง</div>
+    <h2>Roadmap</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="tl-phase">Month 1–2 · เฟส 1</div>
+        <div class="tl-title">เริ่มขายได้เร็ว</div>
+        <div class="tl-items">
+          <span class="tl-tag">ตารางเรือ</span>
+          <span class="tl-tag">แผนผังที่นั่ง</span>
+          <span class="tl-tag">เพิ่ม Booking เร็ว</span>
+          <span class="tl-tag">แจ้งเตือนกลุ่ม notifications</span>
+          <span class="tl-tag">บิลพื้นฐาน</span>
+          <span class="tl-tag">Morning Print Sheet</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-phase">Month 3–4 · เฟส 2</div>
+        <div class="tl-title">ฟีเจอร์ที่ทำให้ลูกค้ารู้สึกว้าว</div>
+        <div class="tl-items">
+          <span class="tl-tag">ลูกค้าเช็กอินเองด้วย QR</span>
+          <span class="tl-tag">Digital Waivers</span>
+          <span class="tl-tag">ติดตามอุปกรณ์ด้วย QR</span>
+          <span class="tl-tag">บันทึก Dive Computer</span>
+          <span class="tl-tag">Cloud Storage</span>
+          <span class="tl-tag">รายชื่อฉุกเฉิน</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-phase">Month 5–6 · เฟส 3</div>
+        <div class="tl-title">ระบบ Cert และ Upsell</div>
+        <div class="tl-items">
+          <span class="tl-tag">กรอกฟอร์ม SSI อัตโนมัติ</span>
+          <span class="tl-tag">ติดตามคอร์ส</span>
+          <span class="tl-tag">สร้าง Cert PDF</span>
+          <span class="tl-tag">Trigger AOW เมื่อครบ 50 ไดฟ์</span>
+          <span class="tl-tag">Analytics Dashboard</span>
+          <span class="tl-tag">เชื่อมต่อ LINE OA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET -->
+  <div class="market-section">
+    <div class="section-label">ตลาดเป้าหมาย</div>
+    <h2>เริ่มขายที่ไหนดี</h2>
+    <div class="market-grid">
+      <div class="market-card">
+        <div class="market-location">🏝️ Koh Tao</div>
+        <div style="font-size:11px;color:var(--muted)">พื้นที่ที่คุณรู้จักดีที่สุด และมี Connection อยู่แล้ว</div>
+        <div class="market-count">100+</div>
+        <div class="market-sub">Dive Center บนเกาะ</div>
+        <div class="market-rev">โอกาสรายได้ ฿150k–500k/เดือน</div>
+      </div>
+      <div class="market-card">
+        <div class="market-location">🌊 Phuket</div>
+        <div style="font-size:11px;color:var(--muted)">ตลาดใหญ่ ปริมาณลูกค้าสูง และมี Pain ชัด</div>
+        <div class="market-count">200+</div>
+        <div class="market-sub">Dive Center + Liveaboard</div>
+        <div class="market-rev">โอกาสรายได้ ฿300k–1M/เดือน</div>
+      </div>
+      <div class="market-card">
+        <div class="market-location">🇮🇩 Bali</div>
+        <div style="font-size:11px;color:var(--muted)">ปัญหาเหมือนกัน แต่ตลาดใหญ่กว่า</div>
+        <div class="market-count">300+</div>
+        <div class="market-sub">Dive Center ทั่วอินโดนีเซีย</div>
+        <div class="market-rev">ขยายหลังจากไทย</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOAT -->
+  <div class="moat-box">
+    <div class="moat-title">🔒 จุดแข็งที่คู่แข่งลอกยาก</div>
+    <p class="moat-text">
+      หลังใช้งาน 2 ปี Dive Center จะมี <span class="moat-highlight">โปรไฟล์นักดำน้ำ 10,000+ คน</span> ประวัติทุกไดฟ์ Waiver ทุกใบ และ Cert ทุกใบอยู่ในระบบของคุณ การย้ายระบบเท่ากับเสียประวัติการทำงานทั้งหมด นี่คือ Data Lock-in แบบที่ SaaS แข็งแรงใช้สร้างความได้เปรียบ คุณไม่ได้ขายแค่ Software — แต่กำลังกลายเป็น <span class="moat-highlight">ความทรงจำของธุรกิจเขา</span>
+    </p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-title">พร้อมเริ่มสร้างหรือยัง?</div>
+    <p class="cta-sub">คุณมีประสบการณ์จริง ตลาดมีอยู่จริง และปัญหานี้คุณเข้าใจดีที่สุด</p>
+    <a href="#" class="cta-btn">Start with the ตารางเรือ →</a>
+  </div>
+
+</div>
+</body>
+</html>
