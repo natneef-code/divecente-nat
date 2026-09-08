@@ -10,4 +10,4 @@
 - Included basic rental set; optional dive computer priced at THB 250 per participant for the activity. No tax or discount in initial slice; pricing model reserved for later configuration.
 - Deposits apply to total including optional equipment. QR graphic is a non-scannable demo placeholder. Wise uses fictional proof references, no file upload or real bank details.
 - Demo documents record acknowledgements only; they do not establish medical clearance, legally binding consent or certification.
-- Production reference web fetch failed; inspect by browser/network during QA. No claim of deployment verification yet.
+- Production reference returned HTTP 404 during direct network inspection on 2026-09-08. Preserve index as the content reference and do not modify production.

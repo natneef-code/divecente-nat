@@ -20,3 +20,7 @@ Netlify: install using npm lockfile (`npm ci`), build `npm run build`, publish `
 
 ## Continuity
 Read AGENTS.md and docs/ before changes. Scope and next tasks are in IMPLEMENTATION_PLAN.md. MASTER_PROMPT.md preserves the full product brief; PROGRESS.md distinguishes implemented behavior from future work. ARCHITECTURE.md describes relational relationships and production migration.
+
+## Browser QA
+
+`npm run test:e2e` runs desktop and mobile-emulated Chrome workflows plus axe checks. Local runs use installed Google Chrome. CI installs Chromium. To test a deployed preview: `PLAYWRIGHT_BASE_URL=https://<verified-preview-host> npm run test:e2e`. See docs/REVIEW_GUIDE.md for the manual walkthrough and docs/SECURITY_REVIEW.md for production gates.

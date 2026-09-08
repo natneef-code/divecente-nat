@@ -12,11 +12,11 @@
 Acceptance: production build, meaningful homepage, route protection and data-model tests.
 
 ## Phase 2 — Connected vertical slice
-- [ ] Course/date/participants/equipment/document/terms booking form.
-- [ ] Calculated 10% QR demo deposit and Wise pending verification.
-- [ ] Confirmation, customer portal, same booking in staff list and calendar.
-- [ ] Capacity, ownership, duplicate payment and payment approval tests.
-- [ ] Browser workflow, refresh, mobile, invalid routes, empty/error states.
+- [x] Course/date/participants/equipment/document/terms booking form.
+- [x] Calculated 10% QR demo deposit and Wise pending verification.
+- [x] Confirmation, customer portal, same booking in staff list and calendar.
+- [x] Capacity, ownership, duplicate payment and payment approval tests.
+- [x] Browser workflow, refresh, mobile, invalid routes, empty/error states.
 - [ ] Update docs; commit; push; open PR; verify Netlify preview and direct routes.
 Acceptance: full public → booking → payment → portal → staff → calendar journey with persisted state and no production replacement.
 
