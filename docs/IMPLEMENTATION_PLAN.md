@@ -3,12 +3,12 @@
 ## Definitions checkpoint
 - [x] Inspect repository and branch; preserve index reference.
 - [x] Save complete Master Prompt, rules and seven continuity documents.
-- [ ] Commit definitions before implementation.
+- [x] Commit definitions before implementation.
 
 ## Phase 1 — Foundation
-- [ ] Initialize React/TypeScript/Vite, lockfile, scripts, Netlify routing, env example, README.
-- [ ] Typed domain, seed data, validation, persistent demo adapter.
-- [ ] Public overview, course routes, four demo roles, protected navigation.
+- [x] Initialize React/TypeScript/Vite, lockfile, scripts, Netlify routing, env example, README.
+- [x] Typed domain, seed data, validation, persistent demo adapter.
+- [x] Public overview, course routes, four demo roles, protected navigation.
 Acceptance: production build, meaningful homepage, route protection and data-model tests.
 
 ## Phase 2 — Connected vertical slice
