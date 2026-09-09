@@ -15,4 +15,12 @@ Browser suite covers Open Water booking → demo deposit → confirmation → po
 
 No full manual screen-reader audit or real-device Safari test. No real authentication, database, money, messages, medical clearance, file uploads, SSI certification, instructor/boat/equipment overlap or full manager/training workflows tested; those implementations remain later-phase work.
 
-Netlify Deploy Preview, direct deployed routes and external CI: verification pending push/PR. Do not claim a verified deployment until checks are recorded here.
+## Deployed verification — 2026-09-09
+
+Preview: https://deploy-preview-1--divecente-nat.netlify.app
+
+All 20 desktop/mobile Playwright checks passed against the live Netlify deployment in 29.3 seconds. This verifies direct routes, QR/Wise journeys, persistence, role restrictions, capacity, calendar filters and axe checks on the deployed asset bundle for commit 5f3345b.
+
+GitHub Actions initial run 34210584831: install, domain tests and build passed; browser tests were 18 passed, 2 failed because the Wise test queried a balance before route navigation completed. An explicit URL and heading wait fixes the test race; CI rerun verification pending this checkpoint. No application behavior change was required.
+
+The first attempted live test run was blocked by automatic approval review due to exhausted workspace credits. The authorized retry succeeded on 2026-09-09.

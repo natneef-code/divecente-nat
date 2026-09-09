@@ -1,7 +1,7 @@
 # Review guide
 
 ## Try the slice
-1. Open the Deploy Preview from the PR (URL recorded after verification). Choose View Courses → Open Water.
+1. Open https://deploy-preview-1--divecente-nat.netlify.app (verified for Phase 2). Choose View Courses → Open Water.
 2. Continue as Customer. Select a date and up to four fictional participants. Choose included equipment or an optional computer.
 3. Review prerequisites, optionally submit placeholder documents, accept demo terms, choose QR and create the booking.
 4. Select Simulate successful payment. One student without add-ons is THB 8,500 total, THB 850 deposit, THB 7,650 remaining.

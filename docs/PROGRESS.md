@@ -1,10 +1,10 @@
 # Progress
 
-Current milestone: Phase 1 and Phase 2 implemented and locally verified. Preparing push, pull request and Netlify Deploy Preview verification. The overall five-phase MVP is not yet complete.
+Current milestone: Phase 1 and Phase 2 implemented and locally verified. PR #1 published; live Netlify preview passed all 20 tests on 2026-09-09. Final CI timing fix in progress. The overall five-phase MVP is not yet complete.
 
 | Module | Classification | Implemented / remaining |
 | --- | --- | --- |
-| Master prompt, rules, continuity | Complete and working | Definitions committed first as ebfe282 |
+| Master prompt, rules, continuity | Complete and working | Definitions committed first as e8a9c12 |
 | Application foundation | Complete and working | React/TypeScript/Vite, Netlify routing, lockfile, scripts, CI |
 | Public overview and catalogue | Working with demo data | Preserves product overview; three public courses and detail routes |
 | Demo roles and navigation | Working with demo data | Customer, Front Desk, Instructor, Manager; route and command checks |
@@ -27,6 +27,6 @@ Current milestone: Phase 1 and Phase 2 implemented and locally verified. Prepari
 | Notifications/social providers | Simulated integration | Explicitly inactive; event previews/provider adapters not implemented yet |
 | Authentication/database production | Blocked by credentials or decision | Requires server implementation, verified identity, transactional PostgreSQL and policies |
 | Responsive/accessibility/workflow QA | Complete and working | Scope-specific automated tests and visual inspection; not a full manual accessibility audit |
-| Pull request/Deploy Preview | Partially complete | Push and external verification next |
+| Pull request/Deploy Preview | Complete and working | PR #1 open/unmerged; live preview verified with 20 browser checks |
 
 Do not merge into main or expand independent modules before the vertical-slice preview has been tested. Next milestone: verified PR deployment, then Phase 3 according to IMPLEMENTATION_PLAN.

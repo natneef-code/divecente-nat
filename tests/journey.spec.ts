@@ -109,6 +109,10 @@ test("Wise submission needs staff verification and records the balance only afte
   ).toBeVisible();
   await login(page);
   await page.getByRole("link", { name: "View booking", exact: false }).click();
+  await expect(page).toHaveURL(/\/portal\/bookings\//);
+  await expect(
+    page.getByRole("heading", { name: "Your place is reserved." }),
+  ).toBeVisible();
   await expect(
     page.getByText("Outstanding balance").locator(".."),
   ).toContainText("7,650");
