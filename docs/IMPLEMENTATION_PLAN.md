@@ -18,7 +18,7 @@ Acceptance: production build, meaningful homepage, route protection and data-mod
 - [x] Capacity, ownership, duplicate payment and payment approval tests.
 - [x] Browser workflow, refresh, mobile, invalid routes, empty/error states.
 - [x] Update docs; commit; push; open PR; verify Netlify preview and direct routes.
-- [ ] Confirm corrected GitHub CI run and finalize handoff.
+- [x] Confirm corrected GitHub CI run and finalize handoff.
 Acceptance: full public → booking → payment → portal → staff → calendar journey with persisted state and no production replacement.
 
 ## Phase 3 — Core operations (after vertical-slice preview)

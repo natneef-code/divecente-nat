@@ -24,3 +24,11 @@ Read AGENTS.md and docs/ before changes. Scope and next tasks are in IMPLEMENTAT
 ## Browser QA
 
 `npm run test:e2e` runs desktop and mobile-emulated Chrome workflows plus axe checks. Local runs use installed Google Chrome. CI installs Chromium. To test a deployed preview: `PLAYWRIGHT_BASE_URL=https://<verified-preview-host> npm run test:e2e`. See docs/REVIEW_GUIDE.md for the manual walkthrough and docs/SECURITY_REVIEW.md for production gates.
+
+## Verified Phase 1–2 preview
+
+- [Live demo](https://deploy-preview-1--divecente-nat.netlify.app)
+- [Pull request #1](https://github.com/natneef-code/divecente-nat/pull/1) — unmerged, awaiting explicit approval
+- [Passing CI](https://github.com/natneef-code/divecente-nat/actions/runs/34308107016)
+
+Select any of the four roles at `/demo` without a password. The complete Open Water → booking → 10% demo deposit → portal → staff → calendar journey is working with fictional browser-local data. The wider Phase 3–5 MVP is documented backlog, not completed functionality.

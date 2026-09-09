@@ -21,6 +21,16 @@ Preview: https://deploy-preview-1--divecente-nat.netlify.app
 
 All 20 desktop/mobile Playwright checks passed against the live Netlify deployment in 29.3 seconds. This verifies direct routes, QR/Wise journeys, persistence, role restrictions, capacity, calendar filters and axe checks on the deployed asset bundle for commit 5f3345b.
 
-GitHub Actions initial run 34210584831: install, domain tests and build passed; browser tests were 18 passed, 2 failed because the Wise test queried a balance before route navigation completed. An explicit URL and heading wait fixes the test race; CI rerun verification pending this checkpoint. No application behavior change was required.
+GitHub Actions initial run 34210584831: install, domain tests and build passed; browser tests were 18 passed, 2 failed because the Wise test queried a balance before route navigation completed. An explicit URL and heading wait fixes the test race; CI rerun 34308107016 passed all steps on d4205ba, including all 20 browser checks. No application behavior change was required.
 
 The first attempted live test run was blocked by automatic approval review due to exhausted workspace credits. The authorized retry succeeded on 2026-09-09.
+
+## Final deployment evidence
+
+On 2026-09-09, all eight required direct routes returned HTTP 200 from the rebuilt preview. The JavaScript bundle was byte-identical to the local production build. CSP and X-Content-Type-Options: nosniff headers were verified.
+
+- PR: https://github.com/natneef-code/divecente-nat/pull/1
+- Passing CI: https://github.com/natneef-code/divecente-nat/actions/runs/34308107016
+- Preview: https://deploy-preview-1--divecente-nat.netlify.app
+
+No critical issue remains in the tested Phase 2 scope. Remaining overall-MVP functionality and production limitations are documented in PROGRESS.md and SECURITY_REVIEW.md.
