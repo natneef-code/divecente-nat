@@ -1,4 +1,5 @@
-export type Role = "customer" | "frontdesk" | "instructor" | "manager";
+export type Role =
+  "customer" | "frontdesk" | "instructor" | "divemaster" | "manager";
 export type Actor = { role: Role; id: string; customerId?: string };
 export type Status =
   | "Enquiry"
@@ -14,6 +15,10 @@ export type Status =
   | "Refunded"
   | "No-show";
 export type Course = {
+  kind?: "course" | "fun-dive";
+  inWater?: boolean;
+  includedEquipment?: string[];
+  staffing?: StaffingRule;
   id: string;
   name: string;
   category: string;
@@ -27,6 +32,18 @@ export type Course = {
   published: boolean;
 };
 export type Activity = {
+  operationalNotes?: {
+    id: string;
+    actorId: string;
+    at: string;
+    text: string;
+  }[];
+  professionalIds?: string[];
+  leadId?: string | null;
+  boatId?: string;
+  siteId?: string;
+  staffing?: StaffingRule;
+  readinessStatus?: "Draft" | "Ready";
   id: string;
   courseId: string;
   date: string;
@@ -60,13 +77,18 @@ export type Customer = {
 export type Participant = {
   id: string;
   name: string;
-  size: string;
-  equipment: "Included set" | "Set + computer";
+  size?: string;
+  equipment: string;
+  rental?: RentalSelection;
+  certification?: DiverExperience;
+  refresher?: RefresherRequirement;
   documents: "Not started" | "Submitted";
   medical: MedicalStatus;
   createdAt: string;
 };
 export type Booking = {
+  lineItems?: BookingLine[];
+  kind?: "course" | "fun-dive";
   id: string;
   customerId: string;
   activityId: string;
@@ -107,7 +129,10 @@ export type Store = {
   bookings: Booking[];
   payments: Payment[];
   events: AuditEvent[];
-  schemaRevision: 2;
+  schemaRevision: 3;
+  sessions: Session[];
+  boats: Boat[];
+  diveSites: DiveSite[];
   staffMembers: StaffMember[];
   enquiries: Enquiry[];
   documents: DocumentRecord[];
@@ -145,6 +170,13 @@ export const roles: {
     person: "Mali",
   },
   {
+    id: "divemaster",
+    name: "Divemaster",
+    description:
+      "Lead qualified Fun Dives, assist courses and fit rental equipment.",
+    person: "Dao",
+  },
+  {
     id: "manager",
     name: "Manager",
     description: "Review bookings, deposits, capacity and daily operations.",
@@ -153,7 +185,12 @@ export const roles: {
 ];
 export const actorFor = (role: Role): Actor => ({
   role,
-  id: role === "instructor" ? "instructor-mali" : `user-${role}`,
+  id:
+    role === "instructor"
+      ? "instructor-mali"
+      : role === "divemaster"
+        ? "divemaster-dao"
+        : `user-${role}`,
   ...(role === "customer" ? { customerId: "customer-alex" } : {}),
 });
 export const money = (satang: number) =>
@@ -302,4 +339,76 @@ export type Settings = {
   language: string;
   defaultDepositBps: number;
   channels: string[];
+  defaultStaffingRatio: number;
+  refresherMonths: number;
+  refresherPrice: number;
+  computerDailyPrice: number;
+  fullPackageDailyPrice: number;
+  equipmentPackage: string[];
+  individualDailyPrices: Record<string, number>;
+};
+
+export const STANDARD_EQUIPMENT = [
+  "Wetsuit 3 mm",
+  "Fins",
+  "Regulator set",
+  "Mask",
+  "Dive computer",
+];
+export type StaffingRule = {
+  ratio?: number;
+  minimum?: number;
+  maximum?: number;
+};
+export type Boat = { id: string; name: string; capacity: number };
+export type DiveSite = {
+  id: string;
+  name: string;
+  capacity: number;
+  staffing: StaffingRule;
+};
+export type Session = {
+  id: string;
+  activityId: string;
+  date: string;
+  endDate: string;
+  time: string;
+  endTime: string;
+  inWater: boolean;
+  professionalIds?: string[];
+  leadId?: string | null;
+  staffing: StaffingRule;
+  includedEquipment?: string[];
+};
+export type RentalSelection = {
+  mode: "none" | "full" | "individual";
+  categories: string[];
+};
+export type DiverExperience = {
+  agency: string;
+  level: string;
+  number: string;
+  loggedDives: number;
+  lastDive: string;
+};
+export type RefresherRequirement = {
+  required: true;
+  status: "Required" | "Scheduled" | "Completed" | "Overridden";
+  thresholdMonths: number;
+  scheduledFor?: string;
+  completedAt?: string;
+  completedBy?: string;
+  overrideReason?: string;
+  overriddenBy?: string;
+  overriddenAt?: string;
+};
+export type BookingLine = {
+  id: string;
+  kind: "product" | "rental" | "refresher" | "legacy";
+  participantId?: string;
+  label: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+  required?: boolean;
 };

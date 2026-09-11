@@ -19,8 +19,6 @@ const input = (method: "QR" | "Wise" = "QR", count = 1): BookingInput => ({
   activityId: "open-water-0",
   participants: Array.from({ length: count }, (_, i) => ({
     name: `Demo Diver ${i}`,
-    size: "M",
-    computer: false,
   })),
   documents: true,
   terms: true,
@@ -35,7 +33,7 @@ describe("booking vertical slice", () => {
       [350000, 35000],
     ])
       expect(quote(price, 1, 0, 1000)).toEqual({ total: price, deposit });
-    expect(quote(850000, 2, 1, 1000)).toEqual({
+    expect(quote(850000, 2, 25000, 1000)).toEqual({
       total: 1725000,
       deposit: 172500,
     });
@@ -62,7 +60,7 @@ describe("booking vertical slice", () => {
     );
   });
   it("rejects invalid and fractional counts and data", () => {
-    for (const count of [0, 5, 1.5])
+    for (const count of [0, 101, 1.5])
       expect(() => quote(850000, count, 0, 1000)).toThrow();
     expect(() =>
       createBooking(seed(), customer, { ...input(), terms: false }),
@@ -70,7 +68,7 @@ describe("booking vertical slice", () => {
     expect(() =>
       createBooking(seed(), customer, {
         ...input(),
-        participants: [{ name: " ", size: "M", computer: false }],
+        participants: [{ name: " " }],
       }),
     ).toThrow();
   });

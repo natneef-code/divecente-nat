@@ -154,7 +154,13 @@ export function WorkspaceNav() {
         </span>
         <nav aria-label="Workspace navigation">
           {actor?.role === "customer" ? (
-            <NavLink to="/portal">My bookings</NavLink>
+            <>
+              <NavLink to="/portal" end>
+                My bookings
+              </NavLink>
+              <NavLink to="/portal/profile">My profile</NavLink>
+              <NavLink to="/portal/training">My training</NavLink>
+            </>
           ) : (
             <>
               <NavLink to="/app" end>
@@ -163,6 +169,24 @@ export function WorkspaceNav() {
                   : "Bookings"}
               </NavLink>
               <NavLink to="/app/calendar">Operations calendar</NavLink>
+              <NavLink to="/app/staffing">Staffing</NavLink>
+              <NavLink to="/app/equipment">Equipment</NavLink>
+              {(actor?.role === "instructor" || actor?.role === "manager") && (
+                <NavLink to="/app/training">Training</NavLink>
+              )}
+              {(actor?.role === "frontdesk" || actor?.role === "manager") && (
+                <>
+                  <NavLink to="/app/customers">Customers</NavLink>
+                  <NavLink to="/app/enquiries">Enquiries</NavLink>
+                  <NavLink to="/app/new-booking">New booking</NavLink>
+                </>
+              )}
+              {actor?.role === "manager" && (
+                <>
+                  <NavLink to="/app/settings">Settings</NavLink>
+                  <NavLink to="/app/reports">Reports & audit</NavLink>
+                </>
+              )}
             </>
           )}
           <Link to="/demo">Switch demo role</Link>

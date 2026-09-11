@@ -37,3 +37,10 @@ No critical issue remains in the tested Phase 2 scope. Remaining overall-MVP fun
 
 ## Recovery baseline — 2026-09-10
 Fixed CRM JSX syntax. Production build passed; 9 domain tests passed; 20 desktop/mobile checks passed in 20.8s. This baseline precedes the confirmed staffing/Fun Dive/equipment amendment; superseded assertions will be updated explicitly.
+
+## 2026-09-10 amended Phase 3 validation
+Recovery baseline: production build, 9 domain and 20 desktop/mobile tests passed before checkpoint 67143e2. Amended suite: 33 domain tests passed. Original 20 browser cases passed after updating the obsolete computer-upsell expectation. Five new desktop/mobile scenarios exercise Fun Dive/Refresher, professional fitting/correction/damage, Manager capacity + six-student staffing, staff manual booking + Instructor training, and operational accessibility/mobile reflow.
+
+Initial new-test failures were incorrect exact select-label locators and an outdated manual-deposit button label; corrected to accessible combobox roles/current labels. An operational-note import omission was caught by TypeScript and corrected before final build. No failed run is represented as a successful build. Final complete suite and deployed results are recorded below when verified.
+
+Final local verification: formatting passed; 33 domain tests passed; TypeScript/Vite production build passed; all 30 desktop/mobile browser cases passed in 24.1 seconds, including axe checks on public and operational routes and zero horizontal overflow checks. Mobile staffing screenshot inspected: navigation wraps, cards and forms fit, controls remain readable. No unresolved test failures. Final overview copy is checked with the public accessibility suite before publication.

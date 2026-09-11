@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useStore } from "../data/store";
-import { type Customer, dateLabel, money } from "../domain/model";
-import { staff, createBooking, quote, reserved } from "../domain/commands";
+import { type Customer, dateLabel } from "../domain/model";
+import { staff } from "../domain/commands";
 import {
   saveCustomer,
   createEnquiry,
@@ -363,192 +363,27 @@ export function Enquiries() {
   );
 }
 export function ManualBooking() {
-  const { state, actor, update } = useStore();
-  const [params] = useSearchParams();
-  const navigate = useNavigate();
-  const [customerId, setCustomer] = useState(
-    params.get("customer") || state.customers[0]?.id || "",
-  );
-  const [activityId, setActivity] = useState(state.activities[0]?.id || "");
-  const [participants, setParticipants] = useState([
-    {
-      name: state.customers.find((c) => c.id === customerId)?.name || "",
-      size: "M",
-      computer: false,
-    },
-  ]);
-  const [documents, setDocuments] = useState(false);
-  const [reviewed, setReviewed] = useState(false);
-  const [error, setError] = useState("");
+  const { state, actor } = useStore();
   if (!staff(actor)) return <Denied />;
-  const activity = state.activities.find((x) => x.id === activityId);
-  const course = state.courses.find((c) => c.id === activity?.courseId);
-  const price = course
-    ? quote(
-        course.price,
-        participants.length,
-        participants.filter((p) => p.computer).length,
-        course.depositBps,
-      )
-    : null;
   return (
     <main className="container section">
       <PageTitle
         eyebrow="FRONT DESK"
         title="Create a booking for your customer."
+        description="Choose a product, then select the customer and complete the shared booking workflow."
       />
-      <Notice />
-      <form
-        className="panel"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setError("");
-          try {
-            update((s, a) => {
-              const result = createBooking(s, a, {
-                customerId,
-                activityId,
-                participants,
-                documents,
-                terms: reviewed,
-                prerequisites: reviewed,
-                method: "Wise",
-              });
-              return { state: result.state, result: result.id };
-            });
-            navigate("/app");
-          } catch (e) {
-            setError((e as Error).message);
-          }
-        }}
-      >
-        <div className="form-grid">
-          <Field
-            label="Booking customer"
-            value={customerId}
-            onChange={(v) => {
-              setCustomer(v);
-              setParticipants([
-                {
-                  name: state.customers.find((c) => c.id === v)?.name || "",
-                  size: "M",
-                  computer: false,
-                },
-              ]);
-            }}
-          >
-            {state.customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Field>
-          <Field
-            label="Booking activity"
-            value={activityId}
-            onChange={setActivity}
-          >
-            {state.activities.map((a) => (
-              <option key={a.id} value={a.id}>
-                {state.courses.find((c) => c.id === a.courseId)?.name} ·{" "}
-                {dateLabel(a.date)} · {a.capacity - reserved(state, a.id)} free
-              </option>
-            ))}
-          </Field>
-          <Field
-            label="Group size"
-            value={participants.length}
-            onChange={(v) =>
-              setParticipants((old) =>
-                Array.from(
-                  { length: Number(v) },
-                  (_, i) => old[i] || { name: "", size: "M", computer: false },
-                ),
-              )
-            }
-          >
-            {[1, 2, 3, 4].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </Field>
-        </div>
-        {participants.map((p, i) => (
-          <fieldset key={i}>
-            <legend>Participant {i + 1}</legend>
-            <div className="form-grid">
-              <Field
-                label={`Participant ${i + 1} name`}
-                value={p.name}
-                required
-                onChange={(name) =>
-                  setParticipants((ps) =>
-                    ps.map((p, n) => (n === i ? { ...p, name } : p)),
-                  )
-                }
-              />
-              <Field
-                label={`Participant ${i + 1} size`}
-                value={p.size}
-                onChange={(size) =>
-                  setParticipants((ps) =>
-                    ps.map((p, n) => (n === i ? { ...p, size } : p)),
-                  )
-                }
-              >
-                {["XS", "S", "M", "L", "XL", "XXL"].map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </Field>
-            </div>
-            <label className="check-row">
-              <input
-                type="checkbox"
-                checked={p.computer}
-                onChange={(e) =>
-                  setParticipants((ps) =>
-                    ps.map((p, n) =>
-                      n === i ? { ...p, computer: e.target.checked } : p,
-                    ),
-                  )
-                }
-              />
-              Add computer · THB 250
-            </label>
-          </fieldset>
-        ))}
-        <label className="check-row">
-          <input
-            type="checkbox"
-            checked={documents}
-            onChange={(e) => setDocuments(e.target.checked)}
-          />
-          Record mock document submission (still needs staff review)
-        </label>
-        <label className="check-row">
-          <input
-            type="checkbox"
-            checked={reviewed}
-            required
-            onChange={(e) => setReviewed(e.target.checked)}
-          />
-          I reviewed the prerequisites and fictional booking terms with the demo
-          customer.
-        </label>
-        {price && (
-          <p>
-            Total {money(price.total)} · Deposit {money(price.deposit)} · Record
-            a manual demo payment from the booking list.
-          </p>
-        )}
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-        <button>Create staff booking</button>
-      </form>
+      <div className="booking-cards">
+        {state.courses
+          .filter((c) => c.published)
+          .map((c) => (
+            <section className="panel" key={c.id}>
+              <h2>{c.name}</h2>
+              <Link className="button" to={`/courses/${c.id}`}>
+                Book {c.name}
+              </Link>
+            </section>
+          ))}
+      </div>
     </main>
   );
 }

@@ -31,4 +31,4 @@ Read AGENTS.md and docs/ before changes. Scope and next tasks are in IMPLEMENTAT
 - [Pull request #1](https://github.com/natneef-code/divecente-nat/pull/1) — unmerged, awaiting explicit approval
 - [Passing CI](https://github.com/natneef-code/divecente-nat/actions/runs/34308107016)
 
-Select any of the four roles at `/demo` without a password. The complete Open Water → booking → 10% demo deposit → portal → staff → calendar journey is working with fictional browser-local data. The wider Phase 3–5 MVP is documented backlog, not completed functionality.
+Select any of the five roles at `/demo` without a password. The complete Open Water → booking → 10% demo deposit → portal → staff → calendar journey is working with fictional browser-local data. The amended Phase 3 demo adds Fun Dive/Refresher, professional staffing and asset handling, CRM, training, document review and Manager settings. Full product/availability administration, richer workflows and production services remain documented backlog.

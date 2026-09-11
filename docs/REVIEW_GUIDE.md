@@ -20,3 +20,12 @@ Review code, docs, test results and Netlify preview on the PR. This PR delivers 
 2. Phase 4 reports, maintenance, conflict views, staff qualifications, notification previews and settings.
 3. Phase 5 full journey/security/privacy/accessibility audit and production readiness.
 4. After MVP: actual providers, database/auth deployment, localization, gateway/communication integrations, only after required reviews and credentials.
+
+## Review amended Phase 3
+1. Customer → Open Water: verify no size/asset fields and computer included; deposit remains THB 850.
+2. Customer → Fun Dive: enter fictional SSI/Open Water/DEMO-123, logged dives 20 and last dive 2020-01-01. Try package/individual rentals; the mandatory Refresher fee appears. Create and simulate deposit.
+3. Front Desk: confirm the Fun Dive; check-in is blocked. Schedule Refresher. Divemaster: record demo completion. Front Desk: check in.
+4. Front Desk → Staffing: add Dao alongside Mali for Open Water. Divemaster → Equipment: select category/size/asset/participant; reserve. Front Desk: correct to another asset with reason. Divemaster: check out and return; record fictional damage.
+5. Manager → Settings: raise Open Water product and first activity capacity to eight. Assign Mali + Dao, then book six participants. Staffing shows two required/assigned. Try a stricter session/site ratio to see readiness fail. Template, activity, session and site limits combine strictly.
+6. Front Desk: manual booking, mock deposit, document review and check-in. Instructor → Training: attendance, milestones, notes, Ready for SSI processing. Divemaster cannot approve training; Fun Dive has no enrolment.
+7. Manager → Reports & audit: view financial totals, conflicts, notification previews and correction/override history. All amounts/events are fictional. PR remains unmerged until explicit approval.

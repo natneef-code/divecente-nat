@@ -1,3 +1,13 @@
+import { BookingOperations } from "./BookingOperations";
+import { Refreshers } from "./Staffing";
+import {
+  hasAssignment,
+  isProfessional,
+  effectiveRules,
+  operationalReadiness,
+  assignedIds,
+} from "../domain/policies";
+import { staffName } from "../domain/operations";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -24,7 +34,7 @@ export function Staff() {
   const [status, setStatus] = useState("all");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const instructor = actor?.role === "instructor";
+  const instructor = !!actor && isProfessional(actor);
   const bookings = state.bookings.filter(
     (b) => actor && canRead(state, actor, b),
   );
@@ -54,7 +64,9 @@ export function Staff() {
   return (
     <main className="container section">
       <PageTitle
-        eyebrow={instructor ? "INSTRUCTOR · MALI" : "DAILY OPERATIONS"}
+        eyebrow={
+          instructor ? "DIVE PROFESSIONAL WORKSPACE" : "DAILY OPERATIONS"
+        }
         title={
           instructor
             ? "Your students, your next dives."
@@ -161,9 +173,15 @@ export function Staff() {
                     <span className="avatar">{p.name[0]}</span>
                     <span>
                       <strong>{p.name}</strong>
-                      <small>
-                        {p.equipment} · {p.size}
-                      </small>
+                      <small>{p.equipment}</small>
+                      {p.certification && (
+                        <small>
+                          {p.certification.agency} · {p.certification.level} ·{" "}
+                          {p.certification.number} ·{" "}
+                          {p.certification.loggedDives} logged dives · last dive{" "}
+                          {p.certification.lastDive}
+                        </small>
+                      )}
                     </span>
                     <Badge>
                       {p.documents === "Submitted"
@@ -175,8 +193,10 @@ export function Staff() {
               </div>
               <p className="muted">
                 {a.site} · Instructor:{" "}
-                {a.instructorId === "instructor-mali" ? "Mali" : "Unassigned"} ·
-                Acknowledgements do not establish medical clearance.
+                {assignedIds(state, a)
+                  .map((id) => staffName(state, id))
+                  .join(", ") || "Unassigned"}{" "}
+                · Acknowledgements do not establish medical clearance.
               </p>
               {!instructor && (
                 <>
@@ -257,10 +277,29 @@ export function Staff() {
                     ))}
                 </>
               )}
+              {!instructor && <BookingOperations booking={b} />}
+              <Refreshers booking={b} />
+              {instructor && b.status === "Confirmed" && (
+                <button
+                  onClick={() =>
+                    run(
+                      (s, a) => advanceBooking(s, a, b.id),
+                      "Demo group checked in.",
+                    )
+                  }
+                >
+                  Assist with check-in
+                </button>
+              )}
               {instructor && (
-                <p className="muted">
-                  Attendance, milestones and instructor notes are planned for
-                  Phase 3.
+                <p>
+                  <Link to="/app/equipment">Fit & assign equipment</Link>
+                  {actor?.role === "instructor" && c.kind !== "fun-dive" && (
+                    <>
+                      {" "}
+                      · <Link to="/app/training">Update training</Link>
+                    </>
+                  )}
                 </p>
               )}
             </article>
@@ -281,7 +320,9 @@ export function Calendar() {
   const activities = state.activities
     .filter(
       (a) =>
-        (actor?.role !== "instructor" || a.instructorId === actor.id) &&
+        (!actor ||
+          !isProfessional(actor) ||
+          hasAssignment(state, actor, a.id)) &&
         (course === "all" || a.courseId === course) &&
         (view === "list" ||
           (view === "daily"
@@ -370,7 +411,7 @@ export function Calendar() {
                       </div>
                       <h2>{c.name}</h2>
                     </div>
-                    <Badge>{`${count} / ${Math.min(4, a.capacity, c.capacity)} students`}</Badge>
+                    <Badge>{`${count} / ${effectiveRules(state, a).capacity} ${c.kind === "fun-dive" ? "divers" : "students"}`}</Badge>
                   </div>
                   <p>
                     {dateLabel(a.date)} – {dateLabel(a.endDate)} · {a.site}
@@ -378,16 +419,16 @@ export function Calendar() {
                   <div className="calendar-meta">
                     <span>
                       <Users size={15} />{" "}
-                      {a.instructorId === "instructor-mali"
-                        ? "Mali"
-                        : "Unassigned instructor"}
+                      {assignedIds(state, a)
+                        .map((id) => staffName(state, id))
+                        .join(", ") || "Unassigned professional"}
                     </span>
                     <span>{a.boat}</span>
                   </div>
                   <div className="capacity-bar">
                     <span
                       style={{
-                        width: `${Math.min(100, (count / Math.min(4, a.capacity, c.capacity)) * 100)}%`,
+                        width: `${Math.min(100, (count / effectiveRules(state, a).capacity) * 100)}%`,
                       }}
                     />
                   </div>
@@ -400,7 +441,18 @@ export function Calendar() {
                         ))}
                     </div>
                   )}
-                  {(missing > 0 || !a.instructorId || count > 4) && (
+                  <p>
+                    Staffing: {operationalReadiness(state, a).assigned} assigned
+                    / {operationalReadiness(state, a).required} required ·{" "}
+                    {operationalReadiness(state, a).ready
+                      ? "Coverage ready"
+                      : "Readiness review needed"}
+                    .{" "}
+                    <Link to="/app/staffing">Review staffing & Refreshers</Link>
+                  </p>
+                  {(missing > 0 ||
+                    !a.instructorId ||
+                    count > effectiveRules(state, a).capacity) && (
                     <div className="calendar-alert">
                       <AlertCircle size={15} />
                       {[
@@ -408,7 +460,9 @@ export function Calendar() {
                           ? `${missing} missing document acknowledgements`
                           : "",
                         !a.instructorId ? "Instructor assignment needed" : "",
-                        count > 4 ? "Over capacity" : "",
+                        count > effectiveRules(state, a).capacity
+                          ? "Over capacity"
+                          : "",
                       ]
                         .filter(Boolean)
                         .join(" · ")}
@@ -421,8 +475,8 @@ export function Calendar() {
         </div>
       )}
       <p className="muted">
-        Full session planning, instructor/boat overlap detection and equipment
-        conflict checks are Phase 3 work. Staff assignment is never automatic.
+        Review session coverage, Instructor/Divemaster overlap, boat and
+        equipment conflicts in Staffing. Assignment is always manual.
       </p>
     </main>
   );

@@ -1,25 +1,28 @@
 # Architecture
 
-## Selected stack
-React + TypeScript + Vite SPA, React Router, Vitest domain tests and Playwright browser workflow tests. Netlify builds npm run build and publishes dist. SPA fallback serves direct routes. Demo needs no environment variables or backend credentials.
+## Stack and flow
+React 19 + TypeScript + Vite SPA, React Router, Vitest and Playwright/axe. Netlify builds `npm run build`, publishes `dist`, Node 22, SPA redirects and security headers. No demo credentials/environment variables required.
 
-## Structure and flow
-src/domain: typed model, fictional seed data, pure validated commands and permission checks. src/data: versioned localStorage persistence adapter and React context. src/pages and shared UI: public and role-scoped views. All writes go through domain commands, persist before reporting success, and produce audit events. No real messaging, authentication, medical records or money movement.
+`src/domain/model.ts` is the documented relational equivalent. `seed.ts` and `records.ts` supply fictional fixtures and additive migration. `policies.ts` calculates pricing, staffing, capacities, qualification conflicts, equipment demand and readiness. `commands.ts`, `operations.ts`, and `staffing.ts` enforce roles and state transitions. `src/data/store.tsx` persists a successful command before exposing success. Pages use the same commands across customer and staff entry paths.
 
-## Relational equivalent
-User → role and optional customer/staff identity. Customer → emergency contact and diver attributes. Product/course → availability/activity; activity → course, instructor, boat, site, start/end. Booking → customer + activity + immutable financial snapshot; participants → booking. Payments → booking with method, verification state, amount, timestamps and reference. Documents → participant/type/version/status. Events → actor/entity/action/timestamp. IDs are stable and generated using crypto.randomUUID for new records. Seed IDs are deterministic.
+## Relationships
+User/demo Actor → role and customer or staff ID. Customer holds diver profile/emergency contact; Booking references Customer and Activity. Participant holds booking-specific name, certification/rental/Refresher snapshots. Product/Course acts as Course Template; Fun Dive uses a distinct kind. Activity references template, boat, site and manually selected lead/team. Session references Activity and can override team, lead, staffing and equipment inclusion.
 
-Future tables: roles/permissions; qualifications; course templates; sessions/trips; training enrolments/milestones/attendance; refunds; equipment categories/items/allocations/maintenance; enquiries; notification events/channel settings; system settings. Full field intent lives in MASTER_PROMPT sections 8–19. These are planned, not implemented storage tables.
+Booking owns immutable currency line items, calculated deposit, status history and participants. Payments/refunds reference Booking. Document records reference Booking + Participant with type/version/reviewer/status/expiry. Course-only Enrolment references Booking + Participant, with internal attendance/milestones/notes/status. No Fun Dive enrolments. Equipment Item has a stable unique asset ID; Allocation references item, activity, booking and participant with retained reservation/return history. Maintenance references item and actor. Enquiries can convert to Customer. Notification previews and Audit Events reference affected entities. System settings contain future-booking price/rental/refresher defaults. Staff stores role, qualifications, expiry and availability; production should normalize qualifications and attendance into separate relational tables.
 
-## State transitions
-Awaiting payment → Deposit paid by one successful QR simulation, or → Payment verification by Wise submission. Staff approves pending Wise → Deposit paid, rejects → Awaiting payment. Deposit paid → Confirmed → Checked in. Terminal cancellation policy and refunds follow in Phase 3. A payment cannot be applied twice. Outstanding balance uses approved records only.
+## State and migration
+The existing `diveos-demo-v1` localStorage key and version 1 envelope remain. `schemaRevision: 3` adds sessions, boats, sites, professional teams, Fun Dive, rental/Refresher/settings fields without clearing prior arrays. Legacy single-instructor assignments become default teams. Existing bookings, participants, documents, allocations and financial amounts are retained. Missing old line items receive a clearly labelled historical total; old computer surcharges are not silently refunded or repriced. Original explicit four-seat activity capacities are retained, independently of the new ratio. Older inventory is not overwritten; add assets if increasing class size requires stock. Repeated migration does not duplicate fixtures or enrolments.
+
+Booking: Awaiting payment → QR Deposit paid or Wise Payment verification → approved Deposit paid / rejected Awaiting payment. Front Desk confirms, then check-in validates operational gates. Training proceeds through internal states to Ready for SSI processing; Manager can record Processed externally. Cancellation retains history and releases reserved equipment; recorded refunds never exceed approved payments. Refresher: Required → Scheduled → Completed, or reasoned Manager Overridden; requirement and charge persist. Equipment: Reserved → Checked out → Returned; correction returns the old reservation and creates a new one atomically in a cloned state. Damage blocks future use until Manager service.
+
+Staffing is evaluated for every session using Bangkok intervals (half-open time boundaries). Effective capacity, professional coverage and equipment demand are separate. A persisted Ready label is never sufficient: action guards recalculate readiness. Training completion requires an assigned qualified Instructor, not merely an administrative role.
 
 ## Production migration
-1. Introduce managed PostgreSQL and SQL migrations with entity foreign keys, check constraints for currency/status, transaction locking for capacity and unique payment idempotency keys.
-2. Add Netlify Functions/API endpoints that invoke shared validation and obtain identity only from verified authentication sessions. Replace browser adapter with API adapter.
-3. Configure authentication provider, HttpOnly secure sessions, server role/ownership checks and database row-level policies. Never trust client role or price fields.
-4. Import approved seed/demo fixtures into a separate non-production database; do not import browser personal data. Version migrations and test rollback/backups in staging.
-5. Add payment gateway signed webhooks, provider idempotency and reconciliation; activate Wise only after supported workflow verification.
-6. Add audited restricted document storage, retention/consent/deletion policy, legal review and provider notification adapters. Disable one-click demo access in production.
+1. Introduce managed PostgreSQL migrations with foreign keys, currency/status checks, payment idempotency, transactional capacity locks and interval exclusion constraints for staff/assets.
+2. Add authenticated Netlify Functions/API and replace the browser adapter. Share validation but derive identity and prices on the server; never trust browser role/state.
+3. Normalize role permissions, qualifications, session attendance/milestones and status histories. Use least-privilege row policies and restricted document storage.
+4. Stage migrations with fictional fixtures, rollback/backup exercises and concurrency tests; never import unreviewed personal browser data.
+5. Implement payment provider webhooks, signatures, reconciliation and notification adapters only after credentials/support are verified. Disable demo-role selection in production.
+6. Complete privacy, legal, operational, retention and recovery reviews before real use.
 
-Browser localStorage offers single-browser continuity, not concurrent transactional capacity, cross-device synchronization, or secure authorization. Production is blocked until the above controls are implemented.
+Browser persistence is neither a secure authorization boundary nor a multi-user transactional database. Real authentication, database and integrations remain production work.

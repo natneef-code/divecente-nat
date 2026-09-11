@@ -1,3 +1,4 @@
+import { hasAssignment } from "../domain/policies";
 import { useState } from "react";
 import { useStore } from "../data/store";
 import {
@@ -126,9 +127,7 @@ export function Training() {
     return (
       b &&
       !["Cancelled", "Refunded", "No-show"].includes(b.status) &&
-      (actor.role === "manager" ||
-        state.activities.find((a) => a.id === b.activityId)?.instructorId ===
-          actor.id)
+      (actor.role === "manager" || hasAssignment(state, actor, b.activityId))
     );
   });
   return (

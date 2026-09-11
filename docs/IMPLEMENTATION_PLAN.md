@@ -1,38 +1,37 @@
 # Implementation plan
 
-## Definitions checkpoint
-- [x] Inspect repository and branch; preserve index reference.
-- [x] Save complete Master Prompt, rules and seven continuity documents.
-- [x] Commit definitions before implementation.
+## Definitions and Phase 1–2
+- [x] Definitions committed first; complete original prompt saved.
+- [x] React/TypeScript foundation, Netlify configuration, public homepage and demo navigation.
+- [x] Connected Open Water → booking → deposit → portal → staff → calendar.
+- [x] QR/Wise, persistence, permissions, documents and regression tests.
+- [x] PR #1 and Phase 1–2 live preview verified; never merged.
 
-## Phase 1 — Foundation
-- [x] Initialize React/TypeScript/Vite, lockfile, scripts, Netlify routing, env example, README.
-- [x] Typed domain, seed data, validation, persistent demo adapter.
-- [x] Public overview, course routes, four demo roles, protected navigation.
-Acceptance: production build, meaningful homepage, route protection and data-model tests.
+## Recovery and amended Phase 3 scope
+- [x] Preserve unfinished work, repair CRM JSX, baseline build/tests, recovery checkpoint.
+- [x] Save complete confirmed amendment and permanent rules.
+- [x] Remove customer size/assets; include course computer; configurable template/session inclusion.
+- [x] Distinct Fun Dive with certification/experience, package/category rental pricing and no training enrolment.
+- [x] Mandatory priced Refresher, month threshold, schedule/completion gate and audited Manager override.
+- [x] Instructor/DM distinction; manual activity/session teams; strictest rules and independent capacities.
+- [x] Professional overlap checks and operational readiness; six-person groups with adequate capacity/team.
+- [x] Professional asset fitting/checkout/return/damage; Front Desk audited correction/history.
+- [x] Connected CRM/enquiries/manual booking; course training and document review.
+- [x] Manager settings, basic financial/operational reports, audit and notification previews.
+- [x] Additive browser migration preserving existing financial records.
+- [x] Domain/desktop/mobile regression and amended-rule tests added.
+- [ ] Final complete checks, current preview verification and publication checkpoint (record actual results in TEST_STATUS).
 
-## Phase 2 — Connected vertical slice
-- [x] Course/date/participants/equipment/document/terms booking form.
-- [x] Calculated 10% QR demo deposit and Wise pending verification.
-- [x] Confirmation, customer portal, same booking in staff list and calendar.
-- [x] Capacity, ownership, duplicate payment and payment approval tests.
-- [x] Browser workflow, refresh, mobile, invalid routes, empty/error states.
-- [x] Update docs; commit; push; open PR; verify Netlify preview and direct routes.
-- [x] Confirm corrected GitHub CI run and finalize handoff.
-Acceptance: full public → booking → payment → portal → staff → calendar journey with persisted state and no production replacement.
+## Remaining Phase 3 backlog
+- [ ] Full product creation and availability publishing UI (existing product price/publication and capacity editing works; domain publishing command exists).
+- [ ] Staff profile/qualification/expiry/availability editing UI; workload review beyond current fixtures and conflict checks.
+- [ ] Rich session planning, precise Refresher time/qualified-provider evidence, per-session participant rosters and attendance beyond internal three-milestone demo.
+- [ ] Document-type-specific review, guardian/certification/ID evidence, secure upload/version/signing workflows.
+- [ ] Expanded discounts/taxes/add-ons, complete status transition coverage and payment reconciliation.
 
-## Phase 3 — Core operations (after vertical-slice preview)
-- [ ] CRM/enquiries and full profile editing.
-- [ ] Product/availability management and instructor assignment/conflict rules.
-- [ ] Training attendance, milestones, notes and Ready for SSI processing.
-- [ ] Equipment assets, allocation overlap prevention, checkout/return.
-- [ ] Full document review and remaining payment/status workflows.
-
-## Phase 4 — Management
-- [ ] Dashboard/reports; maintenance; all operational conflict detection.
-- [ ] Notification previews, staff qualifications, settings.
-
-## Phase 5 — Complete MVP handover
-- [ ] All four full workflow suites, accessibility/security/privacy review.
-- [ ] Full feature classifications, production readiness, roadmap and final preview.
-- [ ] Await explicit user approval before merging.
+## Phase 4–5 and production
+- [ ] Rich reporting/filtering, notification provider adapter/channel configuration and alert UX.
+- [ ] Production API/database/authentication with enforceable authorization and concurrent resource locks.
+- [ ] Real payment/messaging integrations only after credentials and support review.
+- [ ] Full manual accessibility, operational, legal/privacy and recovery review; broader browser coverage.
+- [ ] User review of current PR preview; explicit approval required before merge. Never merge autonomously.

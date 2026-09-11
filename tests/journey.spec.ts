@@ -173,18 +173,19 @@ test("full class disables another booking and alternate date is available", asyn
     page.getByRole("button", { name: "Create booking & continue" }),
   ).toBeEnabled();
 });
-test("equipment add-on changes total and calculated deposit", async ({
+test("in-water course includes computer without customer size selection or extra charge", async ({
   page,
 }) => {
   await login(page);
   await page.goto("/courses/open-water");
-  await page.getByLabel("Add a dive computer").check();
-  await expect(page.locator(".deposit-box")).toContainText("875");
-  await expect(page.locator(".summary-row.total")).toContainText("8,750");
+  await expect(page.getByLabel("Add a dive computer")).toHaveCount(0);
+  await expect(page.getByLabel("Equipment size")).toHaveCount(0);
+  await expect(page.locator(".deposit-box")).toContainText("850");
+  await expect(page.locator(".summary-row.total")).toContainText("8,500");
   await page.getByLabel("I have reviewed").check();
   await page.getByLabel("I accept").check();
   await page.getByRole("button", { name: "Create booking & continue" }).click();
-  await expect(page.getByText("Deposit due:")).toContainText("875");
+  await expect(page.getByText("Deposit due:")).toContainText("850");
 });
 test("protected routes, instructor financial exclusion, empty results and invalid routes", async ({
   page,

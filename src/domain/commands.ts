@@ -1,3 +1,14 @@
+import {
+  occupancy,
+  hasAssignment,
+  effectiveRules,
+  staffingSummary,
+  operationalReadiness,
+  equipmentAvailability,
+  priceBooking,
+  type ParticipantInput,
+  canEquip,
+} from "./policies";
 import { syncBookingRecords } from "./records";
 import {
   bangkokDate,
@@ -6,44 +17,40 @@ import {
   type Status,
   type Store,
 } from "./model";
-const terminal: Status[] = ["Cancelled", "Refunded", "No-show"];
-export const reserved = (s: Store, activityId: string) =>
-  s.bookings
-    .filter((b) => b.activityId === activityId && !terminal.includes(b.status))
-    .reduce((n, b) => n + b.participants.length, 0);
+export const reserved = occupancy;
 export const paid = (s: Store, bookingId: string) =>
   s.payments
     .filter((p) => p.bookingId === bookingId && p.status === "Approved")
     .reduce((n, p) => n + p.amount, 0);
-export const balance = (s: Store, b: Booking) => b.total - paid(s, b.id);
+export const balance = (s: Store, b: Booking) =>
+  ["Cancelled", "Refunded"].includes(b.status) ? 0 : b.total - paid(s, b.id);
 export const staff = (a: Actor | null) =>
   a?.role === "frontdesk" || a?.role === "manager";
 export function canRead(s: Store, a: Actor, b: Booking) {
   return (
     staff(a) ||
     (a.role === "customer" && b.customerId === a.customerId) ||
-    (a.role === "instructor" &&
-      s.activities.find((x) => x.id === b.activityId)?.instructorId === a.id)
+    (["instructor", "divemaster"].includes(a.role) &&
+      hasAssignment(s, a, b.activityId))
   );
 }
 export function quote(
   price: number,
   count: number,
-  computers: number,
+  extraSatang: number,
   bps: number,
 ) {
   if (
-    ![price, count, computers, bps].every(Number.isSafeInteger) ||
+    ![price, count, extraSatang, bps].every(Number.isSafeInteger) ||
     price < 0 ||
     count < 1 ||
-    count > 4 ||
-    computers < 0 ||
-    computers > count ||
+    count > 100 ||
+    extraSatang < 0 ||
     bps < 0 ||
     bps > 10000
   )
     throw new Error("Invalid booking price or participant count.");
-  const total = price * count + 25000 * computers;
+  const total = price * count + extraSatang;
   if (!Number.isSafeInteger(total))
     throw new Error("Booking total is too large.");
   return { total, deposit: Math.round((total * bps) / 10000) };
@@ -64,7 +71,7 @@ export function setStatus(b: Booking, status: Status) {
 export type BookingInput = {
   customerId?: string;
   activityId: string;
-  participants: { name: string; size: string; computer: boolean }[];
+  participants: ParticipantInput[];
   documents: boolean;
   terms: boolean;
   prerequisites: boolean;
@@ -92,29 +99,32 @@ export function createBooking(
     );
   if (!["QR", "Wise"].includes(input.method))
     throw new Error("Choose a valid payment method.");
+  const price = priceBooking(source, activity, input.participants);
+  const capacity = Math.min(
+    effectiveRules(source, activity).capacity,
+    ...source.sessions
+      .filter((x) => x.activityId === activity.id)
+      .map((x) => effectiveRules(source, activity, x).capacity),
+  );
+  const projected = reserved(source, activity.id) + input.participants.length;
+  if (projected > capacity)
+    throw new Error(
+      `Not enough places remain. Configured participant capacity is ${capacity}; choose another date.`,
+    );
   if (
-    input.participants.some(
-      (p) =>
-        p.name.trim().length < 2 ||
-        p.name.trim().length > 80 ||
-        !["XS", "S", "M", "L", "XL", "XXL"].includes(p.size),
+    projected > source.settings.defaultStaffingRatio &&
+    !staffingSummary(source, activity, undefined, projected).ready
+  )
+    throw new Error(
+      "Additional qualified professionals must be assigned before reserving this larger group. Contact Front Desk.",
+    );
+  if (
+    equipmentAvailability(source, activity, price.participants).some(
+      (x) => x.missing,
     )
   )
     throw new Error(
-      "Enter each participant’s name (2–80 characters) and equipment size.",
-    );
-  const price = quote(
-    course.price,
-    input.participants.length,
-    input.participants.filter((p) => p.computer).length,
-    course.depositBps,
-  );
-  if (
-    reserved(source, activity.id) + input.participants.length >
-    Math.min(4, course.capacity, activity.capacity)
-  )
-    throw new Error(
-      "Not enough places remain. Maximum class size is four students; choose another date.",
+      "Not enough included/rental equipment is available for the selected activity. Contact Front Desk.",
     );
   const s = structuredClone(source);
   const id = crypto.randomUUID();
@@ -123,17 +133,20 @@ export function createBooking(
     id,
     customerId: ownerId,
     activityId: activity.id,
-    participants: input.participants.map((p) => ({
-      id: crypto.randomUUID(),
-      name: p.name.trim(),
-      size: p.size,
-      equipment: p.computer ? "Set + computer" : "Included set",
-      documents: input.documents ? "Submitted" : "Not started",
-      medical: input.documents ? "Submitted" : "Not started",
-      createdAt: now,
+    participants: price.participants.map((p) => ({
+      ...p,
+      documents: input.documents
+        ? ("Submitted" as const)
+        : ("Not started" as const),
+      medical: input.documents
+        ? ("Submitted" as const)
+        : ("Not started" as const),
     })),
+    kind: course.kind || "course",
+    lineItems: price.lines,
     status: "Awaiting payment",
-    ...price,
+    total: price.total,
+    deposit: price.deposit,
     method: input.method,
     termsVersion: "demo-v1",
     prerequisitesAccepted: true,
@@ -141,6 +154,7 @@ export function createBooking(
     updatedAt: now,
     history: [{ status: "Awaiting payment", at: now }],
   });
+  s.activities.find((x) => x.id === activity.id)!.readinessStatus = "Draft";
   syncBookingRecords(s, s.bookings[0]);
   event(s, a, id, "Booking created");
   return { state: s, id };
@@ -205,9 +219,13 @@ export function verifyPayment(
   return s;
 }
 export function advanceBooking(source: Store, a: Actor, id: string): Store {
-  if (!staff(a)) throw new Error("Permission denied.");
   const s = structuredClone(source);
   const b = s.bookings.find((b) => b.id === id);
+  if (
+    !b ||
+    !(staff(a) || (b.status === "Confirmed" && canEquip(s, a, b.activityId)))
+  )
+    throw new Error("Permission denied.");
   if (!b || !["Deposit paid", "Confirmed"].includes(b.status))
     throw new Error("Booking cannot advance from this status.");
   if (
@@ -217,6 +235,23 @@ export function advanceBooking(source: Store, a: Actor, id: string): Store {
     throw new Error(
       "Submit all demo document acknowledgements before check-in.",
     );
+  if (b.status === "Confirmed") {
+    const readiness = operationalReadiness(
+      s,
+      s.activities.find((x) => x.id === b.activityId)!,
+    );
+    if (!readiness.ready)
+      throw new Error(
+        readiness.issues.join(" ") ||
+          "Operational staffing requirements are not met.",
+      );
+    if (
+      b.participants.some((p) =>
+        ["Review required", "Expired"].includes(p.medical),
+      )
+    )
+      throw new Error("Participant documents require operational review.");
+  }
   setStatus(b, b.status === "Deposit paid" ? "Confirmed" : "Checked in");
   event(s, a, id, `Booking ${b.status.toLowerCase()}`);
   return s;

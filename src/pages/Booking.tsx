@@ -13,15 +13,26 @@ import {
 import { useStore } from "../data/store";
 import {
   balance,
+  staff,
   createBooking,
   paid,
-  quote,
   reserved,
   submitDocuments,
   submitPayment,
 } from "../domain/commands";
-import { dateLabel, money } from "../domain/model";
+import {
+  dateLabel,
+  money,
+  STANDARD_EQUIPMENT,
+  type DiverExperience,
+} from "../domain/model";
 import { Badge, Empty, Notice, PageTitle } from "../ui";
+import {
+  priceBooking,
+  effectiveRules,
+  courseEquipment,
+  type ParticipantInput,
+} from "../domain/policies";
 export const legal =
   "Demo content — requires review by a qualified Thai legal and diving-safety professional before production use.";
 export function CourseDetail() {
@@ -31,9 +42,10 @@ export function CourseDetail() {
   const course = state.courses.find((c) => c.id === courseId && c.published);
   const activities = state.activities.filter((a) => a.courseId === courseId);
   const [activityId, setActivityId] = useState(activities[0]?.id || "");
-  const [participants, setParticipants] = useState([
-    { name: "Alex Morgan", size: "M", computer: false },
+  const [participants, setParticipants] = useState<ParticipantInput[]>([
+    { name: "Alex Morgan" },
   ]);
+  const [customerId, setCustomerId] = useState(state.customers[0]?.id || "");
   const [documents, setDocuments] = useState(false);
   const [terms, setTerms] = useState(false);
   const [prerequisites, setPrerequisites] = useState(false);
@@ -48,17 +60,49 @@ export function CourseDetail() {
         </Link>
       </main>
     );
-  const pricing = quote(
-    course.price,
-    participants.length,
-    participants.filter((p) => p.computer).length,
-    course.depositBps,
-  );
   const activity = activities.find((a) => a.id === activityId);
+  const fun = course.kind === "fun-dive";
+  let pricing = {
+    total: course.price * participants.length,
+    deposit: Math.round(
+      (course.price * participants.length * course.depositBps) / 10000,
+    ),
+    lines: [] as ReturnType<typeof priceBooking>["lines"],
+  };
+  if (activity) {
+    try {
+      pricing = priceBooking(
+        state,
+        activity,
+        participants.map((p) => ({ ...p, name: p.name || "Demo participant" })),
+        false,
+      );
+    } catch {
+      /* Submission reports validation. */
+    }
+  }
+  const capacity = (a: (typeof activities)[number]) =>
+    Math.min(
+      effectiveRules(state, a).capacity,
+      ...state.sessions
+        .filter((x) => x.activityId === a.id)
+        .map((x) => effectiveRules(state, a, x).capacity),
+    );
   const available = activity
-    ? Math.min(4, course.capacity, activity.capacity) -
-      reserved(state, activity.id)
+    ? capacity(activity) - reserved(state, activity.id)
     : 0;
+  const change = (i: number, patch: Partial<ParticipantInput>) =>
+    setParticipants((ps) =>
+      ps.map((p, n) => (n === i ? { ...p, ...patch } : p)),
+    );
+  const experience = (p: ParticipantInput): DiverExperience =>
+    p.certification || {
+      agency: "",
+      level: "",
+      number: "",
+      loggedDives: 0,
+      lastDive: "",
+    };
   function submit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -66,6 +110,7 @@ export function CourseDetail() {
       const id = update((s, a) => {
         const next = createBooking(s, a, {
           activityId,
+          customerId: staff(a) ? customerId : undefined,
           participants,
           documents,
           terms,
@@ -74,7 +119,7 @@ export function CourseDetail() {
         });
         return { state: next.state, result: next.id };
       });
-      navigate(`/portal/bookings/${id}`);
+      navigate(staff(actor) ? "/app" : `/portal/bookings/${id}`);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -85,7 +130,7 @@ export function CourseDetail() {
         <ArrowLeft size={15} /> All courses
       </Link>
       <PageTitle
-        eyebrow={`NATNEEF DIVING · ${course.durationDays}-DAY DEMO COURSE`}
+        eyebrow={`NATNEEF DIVING · ${course.durationDays}-DAY DEMO ${fun ? "FUN DIVE" : "COURSE"}`}
         title={course.name}
         description={course.description}
       />
@@ -98,17 +143,20 @@ export function CourseDetail() {
             </span>
             <span>
               <Users size={18} />
-              Maximum {course.capacity} students
+              Maximum {course.capacity} participants
             </span>
             <span>
               <ShieldCheck size={18} />
-              Small-group instruction
+              {fun ? "Guided recreational diving" : "Small-group instruction"}
             </span>
           </div>
           <section className="panel">
-            <h2>Your course, at a glance</h2>
+            <h2>Your activity, at a glance</h2>
             <div className="included-grid">
-              {course.included.map((x) => (
+              {[
+                ...course.included,
+                ...(!fun && activity ? courseEquipment(state, activity) : []),
+              ].map((x) => (
                 <span key={x}>
                   <Check size={16} />
                   {x}
@@ -124,7 +172,7 @@ export function CourseDetail() {
               </p>
             </div>
           </section>
-          {actor?.role !== "customer" ? (
+          {actor?.role !== "customer" && !staff(actor) ? (
             <section className="panel">
               <h2>Book as a demo customer</h2>
               <p>
@@ -137,6 +185,24 @@ export function CourseDetail() {
             </section>
           ) : (
             <form onSubmit={submit} className="booking-form">
+              {staff(actor) && (
+                <section className="panel">
+                  <label>
+                    Booking customer
+                    <select
+                      value={customerId}
+                      onChange={(e) => setCustomerId(e.target.value)}
+                      required
+                    >
+                      {state.customers.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </section>
+              )}
               <section className="panel">
                 <h2>
                   <span className="step">01</span> Choose your date
@@ -152,11 +218,7 @@ export function CourseDetail() {
                       {activities.map((a) => (
                         <option key={a.id} value={a.id}>
                           {dateLabel(a.date)} ·{" "}
-                          {Math.max(
-                            0,
-                            Math.min(4, course.capacity, a.capacity) -
-                              reserved(state, a.id),
-                          )}{" "}
+                          {Math.max(0, capacity(a) - reserved(state, a.id))}{" "}
                           places left
                         </option>
                       ))}
@@ -172,19 +234,17 @@ export function CourseDetail() {
                         setParticipants((old) =>
                           Array.from(
                             { length: count },
-                            (_, i) =>
-                              old[i] || {
-                                name: "",
-                                size: "M",
-                                computer: false,
-                              },
+                            (_, i) => old[i] || { name: "" },
                           ),
                         );
                       }}
                     >
-                      {[1, 2, 3, 4].map((n) => (
+                      {Array.from(
+                        { length: activity ? capacity(activity) : 1 },
+                        (_, i) => i + 1,
+                      ).map((n) => (
                         <option key={n} value={n}>
-                          {n} {n === 1 ? "student" : "students"}
+                          {n} {n === 1 ? "participant" : "participants"}
                         </option>
                       ))}
                     </select>
@@ -202,8 +262,9 @@ export function CourseDetail() {
                   <span className="step">02</span> Meet your group
                 </h2>
                 <p className="muted">
-                  Use fictional names. Equipment selections are preferences;
-                  individual asset allocation follows in Phase 3.
+                  Use fictional names. Your Instructor or Divemaster will fit
+                  and assign equipment before diving. Customers select packages
+                  or categories only.
                 </p>
                 {participants.map((p, i) => (
                   <fieldset key={i}>
@@ -226,43 +287,184 @@ export function CourseDetail() {
                           }
                         />
                       </label>
-                      <label>
-                        Equipment size
-                        <select
-                          value={p.size}
-                          onChange={(e) =>
-                            setParticipants((ps) =>
-                              ps.map((p, n) =>
-                                n === i ? { ...p, size: e.target.value } : p,
-                              ),
-                            )
-                          }
-                        >
-                          {["XS", "S", "M", "L", "XL", "XXL"].map((s) => (
-                            <option key={s}>{s}</option>
-                          ))}
-                        </select>
-                      </label>
                     </div>
-                    <label className="check-row">
-                      <input
-                        type="checkbox"
-                        checked={p.computer}
-                        onChange={(e) =>
-                          setParticipants((ps) =>
-                            ps.map((p, n) =>
-                              n === i
-                                ? { ...p, computer: e.target.checked }
-                                : p,
-                            ),
-                          )
-                        }
-                      />
-                      <span>
-                        Add a dive computer{" "}
-                        <small>THB 250 per participant for this activity</small>
-                      </span>
-                    </label>
+                    {!fun ? (
+                      <p>
+                        Included at no extra charge:{" "}
+                        {activity &&
+                          courseEquipment(state, activity).join(", ")}
+                        . No equipment upsell.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="form-grid">
+                          <label>
+                            Certification agency
+                            <select
+                              required
+                              value={experience(p).agency}
+                              onChange={(e) =>
+                                change(i, {
+                                  certification: {
+                                    ...experience(p),
+                                    agency: e.target.value,
+                                  },
+                                })
+                              }
+                            >
+                              <option value="">Select agency</option>
+                              {[
+                                "SSI",
+                                "PADI",
+                                "NAUI",
+                                "CMAS",
+                                "SDI",
+                                "BSAC",
+                                "Other recognized agency",
+                              ].map((x) => (
+                                <option key={x}>{x}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            Certification level
+                            <input
+                              required
+                              value={experience(p).level}
+                              onChange={(e) =>
+                                change(i, {
+                                  certification: {
+                                    ...experience(p),
+                                    level: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            Certification number
+                            <input
+                              required
+                              value={experience(p).number}
+                              onChange={(e) =>
+                                change(i, {
+                                  certification: {
+                                    ...experience(p),
+                                    number: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            Logged dives
+                            <input
+                              required
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={experience(p).loggedDives}
+                              onChange={(e) =>
+                                change(i, {
+                                  certification: {
+                                    ...experience(p),
+                                    loggedDives: Number(e.target.value),
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            Last dive date
+                            <input
+                              required
+                              type="date"
+                              value={experience(p).lastDive}
+                              onChange={(e) =>
+                                change(i, {
+                                  certification: {
+                                    ...experience(p),
+                                    lastDive: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            Equipment rental
+                            <select
+                              value={p.rental?.mode || "none"}
+                              onChange={(e) =>
+                                change(i, {
+                                  rental: {
+                                    mode: e.target.value as
+                                      "none" | "full" | "individual",
+                                    categories: [],
+                                  },
+                                })
+                              }
+                            >
+                              <option value="none">
+                                Own equipment · no rental
+                              </option>
+                              <option value="full">
+                                Full Equipment Package
+                              </option>
+                              <option value="individual">
+                                Individual items
+                              </option>
+                            </select>
+                          </label>
+                        </div>
+                        <p className="muted">
+                          Full package:{" "}
+                          {state.settings.equipmentPackage.join(", ")} ·{" "}
+                          {money(state.settings.fullPackageDailyPrice)}/day.
+                          Fictional demo prices.
+                        </p>
+                        {p.rental?.mode === "individual" &&
+                          STANDARD_EQUIPMENT.map((category) => (
+                            <label className="check-row" key={category}>
+                              <input
+                                type="checkbox"
+                                checked={p.rental!.categories.includes(
+                                  category,
+                                )}
+                                onChange={(e) =>
+                                  change(i, {
+                                    rental: {
+                                      mode: "individual",
+                                      categories: e.target.checked
+                                        ? [...p.rental!.categories, category]
+                                        : p.rental!.categories.filter(
+                                            (x) => x !== category,
+                                          ),
+                                    },
+                                  })
+                                }
+                              />
+                              {category} ·{" "}
+                              {money(
+                                category === "Dive computer"
+                                  ? state.settings.computerDailyPrice
+                                  : state.settings.individualDailyPrices[
+                                      category
+                                    ],
+                              )}
+                              /day
+                            </label>
+                          ))}
+                        <p className="document-note">
+                          More than {state.settings.refresherMonths} calendar
+                          months since your last dive on the activity date? A
+                          mandatory Refresher (
+                          {money(state.settings.refresherPrice)}, fictional fee)
+                          is added automatically. Book now; complete it before
+                          Fun Dive check-in. This recreational activity creates
+                          no training enrolment or certification.
+                        </p>
+                      </>
+                    )}
                   </fieldset>
                 ))}
               </section>
@@ -383,21 +585,27 @@ export function CourseDetail() {
             <div className="eyebrow">YOUR NEXT ADVENTURE</div>
             <h2>{course.name}</h2>
             <div className="summary-row">
-              <span>Course × {participants.length}</span>
+              <span>
+                {fun ? "Fun Dive" : "Course"} × {participants.length}
+              </span>
               <strong>{money(course.price * participants.length)}</strong>
             </div>
-            <div className="summary-row">
-              <span>Optional computers</span>
-              <strong>
-                {money(participants.filter((p) => p.computer).length * 25000)}
-              </strong>
-            </div>
+            {pricing.lines
+              .filter((l) => l.kind !== "product")
+              .map((l, i) => (
+                <div className="summary-row" key={i}>
+                  <span>
+                    {l.label} × {l.quantity}
+                  </span>
+                  <strong>{money(l.amount)}</strong>
+                </div>
+              ))}
             <div className="summary-row total">
               <span>Total</span>
               <strong>{money(pricing.total)}</strong>
             </div>
             <div className="deposit-box">
-              <span>10% demo deposit</span>
+              <span>{course.depositBps / 100}% demo deposit</span>
               <strong>{money(pricing.deposit)}</strong>
               <small>
                 {money(pricing.total - pricing.deposit)} remaining after deposit
@@ -482,12 +690,21 @@ export function BookingDetail() {
               </span>
               <span>
                 <Users size={17} />
-                {booking.participants.length} students
+                {booking.participants.length}{" "}
+                {course.kind === "fun-dive" ? "divers" : "students"}
               </span>
             </div>
             <p className="muted">
               {activity.time} Asia/Bangkok · {activity.site}
             </p>
+            {booking.lineItems?.map((l) => (
+              <div className="summary-row" key={l.id}>
+                <span>
+                  {l.label} × {l.quantity}
+                </span>
+                <strong>{money(l.amount)}</strong>
+              </div>
+            ))}
             <div className="summary-row">
               <span>Total booking</span>
               <strong>{money(booking.total)}</strong>
@@ -557,8 +774,16 @@ export function BookingDetail() {
                 <div>
                   <strong>{p.name}</strong>
                   <small>
-                    {p.equipment} · size {p.size} · Medical: {p.medical}
+                    {p.equipment} · Medical: {p.medical}
                   </small>
+                  {p.refresher && (
+                    <small>
+                      Mandatory Refresher: {p.refresher.status}
+                      {p.refresher.scheduledFor
+                        ? ` · ${p.refresher.scheduledFor}`
+                        : " · contact the team to schedule"}
+                    </small>
+                  )}
                 </div>
                 <Badge>
                   {p.documents === "Submitted" ? "Acknowledged" : "Not started"}
@@ -613,8 +838,9 @@ export function BookingDetail() {
               <li>Front Desk confirms your booking and checks the group in.</li>
             </ol>
             <p className="muted">
-              Training milestones and certification-processing workflows arrive
-              in the next phase. This demo does not issue qualifications.
+              Course training progress appears in My training. Fun Dives are
+              recreational and have no training enrolment. This demo does not
+              issue qualifications.
             </p>
             <Link className="button secondary full" to="/demo">
               View as another role
@@ -686,7 +912,7 @@ export function Portal() {
                   <h3>{c.name}</h3>
                   <p>
                     {dateLabel(a.date)} · {a.time} · {b.participants.length}{" "}
-                    students
+                    {c.kind === "fun-dive" ? "divers" : "students"}
                   </p>
                   <Badge>{b.status}</Badge>
                 </div>

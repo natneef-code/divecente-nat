@@ -1,9 +1,15 @@
+import {
+  canEquip,
+  isProfessional,
+  requestedEquipment,
+} from "../domain/policies";
 import { useState } from "react";
 import { useStore } from "../data/store";
 import { type EquipmentItem, bangkokDate, dateLabel } from "../domain/model";
 import { staff } from "../domain/commands";
 import {
   allocateEquipment,
+  correctAllocation,
   moveEquipment,
   serviceEquipment,
   saveEquipment,
@@ -18,9 +24,15 @@ function AssetPanel({ item }: { item: EquipmentItem }) {
   const [nextDue, setNextDue] = useState(item.nextMaintenance);
   const [notes, setNotes] = useState("");
   const [damage, setDamage] = useState("");
+  const [replacement, setReplacement] = useState("");
+  const [reason, setReason] = useState("");
   const [form, setForm] = useState(item);
   const active = state.allocations.filter(
-    (x) => x.itemId === item.id && x.status !== "Returned",
+    (x) =>
+      x.itemId === item.id &&
+      x.status !== "Returned" &&
+      !!actor &&
+      canEquip(state, actor, x.activityId),
   );
   return (
     <div className="panel">
@@ -62,6 +74,8 @@ function AssetPanel({ item }: { item: EquipmentItem }) {
           {state.bookings
             .filter(
               (b) =>
+                !!actor &&
+                canEquip(state, actor, b.activityId) &&
                 !["Completed", "Cancelled", "Refunded", "No-show"].includes(
                   b.status,
                 ),
@@ -90,6 +104,45 @@ function AssetPanel({ item }: { item: EquipmentItem }) {
             <div className="allocation" key={x.id}>
               <strong>{p.name}</strong>
               <Badge>{x.status}</Badge>
+              {staff(actor) && x.status === "Reserved" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    run(
+                      (s, a) =>
+                        correctAllocation(s, a, x.id, replacement, reason),
+                      "Assignment corrected; previous record retained.",
+                    );
+                  }}
+                >
+                  <Field
+                    label="Replacement asset"
+                    value={replacement}
+                    onChange={setReplacement}
+                    required
+                  >
+                    <option value="">Select replacement</option>
+                    {state.equipmentItems
+                      .filter(
+                        (i) => i.category === item.category && i.id !== item.id,
+                      )
+                      .map((i) => (
+                        <option key={i.id} value={i.id}>
+                          {i.id} · {i.size} · {i.status}
+                        </option>
+                      ))}
+                  </Field>
+                  <Field
+                    label="Correction reason"
+                    value={reason}
+                    onChange={setReason}
+                    required
+                  />
+                  <button className="secondary form-spacer">
+                    Correct assignment
+                  </button>
+                </form>
+              )}
               <div className="actions compact">
                 {x.status === "Reserved" && (
                   <button
@@ -219,6 +272,19 @@ function AssetPanel({ item }: { item: EquipmentItem }) {
           </form>
         </>
       )}
+      <h3>Allocation history</h3>
+      {state.allocations
+        .filter(
+          (x) =>
+            x.itemId === item.id &&
+            actor &&
+            canEquip(state, actor, x.activityId),
+        )
+        .map((x) => (
+          <p className="muted" key={x.id}>
+            {x.id.slice(0, 8)} · {x.status} · {x.returnedAt || x.createdAt}
+          </p>
+        ))}
       <h3>Service history</h3>
       {state.maintenance
         .filter((m) => m.itemId === item.id)
@@ -234,13 +300,15 @@ export function Equipment() {
   const { state, actor } = useStore();
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
+  const [size, setSize] = useState("all");
   const [selected, setSelected] = useState(state.equipmentItems[0]?.id || "");
   const { run, feedback } = useAction();
-  if (!staff(actor)) return <Denied />;
+  if (!actor || (!staff(actor) && !isProfessional(actor))) return <Denied />;
   const item = state.equipmentItems.find((i) => i.id === selected);
   const rows = state.equipmentItems.filter(
     (i) =>
       (category === "all" || i.category === category) &&
+      (size === "all" || i.size === size) &&
       `${i.id} ${i.category} ${i.size}`
         .toLowerCase()
         .includes(query.toLowerCase()),
@@ -262,6 +330,12 @@ export function Equipment() {
           <option value="all">All categories</option>
           {Object.keys(equipmentCategories).map((c) => (
             <option key={c}>{c}</option>
+          ))}
+        </Field>
+        <Field label="Equipment size" value={size} onChange={setSize}>
+          <option value="all">All sizes</option>
+          {[...new Set(state.equipmentItems.map((i) => i.size))].map((x) => (
+            <option key={x}>{x}</option>
           ))}
         </Field>
         <Field label="Search inventory" value={query} onChange={setQuery} />
@@ -290,6 +364,37 @@ export function Equipment() {
           </button>
         )}
       </div>
+      <details className="panel">
+        <summary>Participants & equipment requirements</summary>
+        {state.bookings
+          .filter(
+            (b) =>
+              actor &&
+              canEquip(state, actor, b.activityId) &&
+              !["Cancelled", "Refunded", "No-show", "Completed"].includes(
+                b.status,
+              ),
+          )
+          .flatMap((b) =>
+            b.participants.map((p) => (
+              <p key={p.id}>
+                <strong>{p.name}</strong> ·{" "}
+                {requestedEquipment(
+                  state,
+                  state.activities.find((a) => a.id === b.activityId)!,
+                  p,
+                ).join(", ") || "Own equipment; no rental requested"}{" "}
+                ·{" "}
+                {
+                  state.allocations.filter(
+                    (x) => x.participantId === p.id && x.status !== "Returned",
+                  ).length
+                }{" "}
+                active allocations
+              </p>
+            )),
+          )}
+      </details>
       <div className="ops-columns inventory-columns">
         <section className="panel">
           <div className="table-scroll">

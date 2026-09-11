@@ -1,3 +1,8 @@
+import { CRM, Enquiries, CustomerProfile, ManualBooking } from "./pages/CRM";
+import { Training, CustomerTraining } from "./pages/Training";
+import { Equipment } from "./pages/Equipment";
+import { Staffing } from "./pages/Staffing";
+import { Configuration, Reports } from "./pages/Configuration";
 import { BrowserRouter, Routes, Route, Link, Outlet } from "react-router-dom";
 import { Component, type ReactNode } from "react";
 import { StoreProvider, useStore } from "./data/store";
@@ -72,6 +77,8 @@ export default function App() {
               <Route path="/courses/:courseId" element={<CourseDetail />} />
               <Route element={<Protected customer />}>
                 <Route path="/portal" element={<Portal />} />
+                <Route path="/portal/profile" element={<CustomerProfile />} />
+                <Route path="/portal/training" element={<CustomerTraining />} />
                 <Route
                   path="/portal/bookings/:bookingId"
                   element={<BookingDetail />}
@@ -79,6 +86,14 @@ export default function App() {
               </Route>
               <Route element={<Protected />}>
                 <Route path="/app" element={<Staff />} />
+                <Route path="/app/customers" element={<CRM />} />
+                <Route path="/app/enquiries" element={<Enquiries />} />
+                <Route path="/app/new-booking" element={<ManualBooking />} />
+                <Route path="/app/training" element={<Training />} />
+                <Route path="/app/equipment" element={<Equipment />} />
+                <Route path="/app/staffing" element={<Staffing />} />
+                <Route path="/app/settings" element={<Configuration />} />
+                <Route path="/app/reports" element={<Reports />} />
                 <Route path="/app/calendar" element={<Calendar />} />
               </Route>
               <Route

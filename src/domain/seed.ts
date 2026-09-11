@@ -1,4 +1,4 @@
-import { operationsSeed } from "./records";
+import { operationsSeed, migrateStore } from "./records";
 import { bangkokDate, type Store } from "./model";
 export function seed(now = new Date()): Store {
   const today = bangkokDate(now);
@@ -8,7 +8,7 @@ export function seed(now = new Date()): Store {
     return d.toISOString().slice(0, 10);
   };
   const timestamp = now.toISOString();
-  return {
+  return migrateStore({
     ...operationsSeed(now),
     version: 1,
     courses: [
@@ -106,5 +106,5 @@ export function seed(now = new Date()): Store {
     bookings: [],
     payments: [],
     events: [],
-  };
+  });
 }

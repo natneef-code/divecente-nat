@@ -82,7 +82,7 @@ export function Home() {
                 </span>
                 <div>
                   <strong>A small group. A big adventure.</strong>
-                  <small>Maximum 4 students per class</small>
+                  <small>Default 4:1 staffing per class</small>
                 </div>
                 <Check size={18} />
               </div>
@@ -241,12 +241,13 @@ export function Home() {
           </div>
           <div>
             <BarChart3 />
-            <h3>Follow the next chapters</h3>
+            <h3>Explore the operations workspace</h3>
             <p>
-              Full CRM, training milestones, equipment allocation, maintenance,
-              advanced reports and real integrations are planned.
+              Try CRM, training milestones, professional staffing, equipment
+              handling and Refresher tracking. Richer administration and real
+              integrations remain planned.
             </p>
-            <span className="badge">Next phases</span>
+            <span className="badge">Demo operations · more to come</span>
           </div>
         </div>
       </section>
@@ -315,7 +316,7 @@ export function Catalogue() {
                 <WavesIcon index={i} />
                 <small>
                   {c.durationDays} {c.durationDays === 1 ? "DAY" : "DAYS"} · MAX
-                  4 STUDENTS
+                  {c.capacity} {c.kind === "fun-dive" ? "DIVERS" : "STUDENTS"}
                 </small>
               </div>
               <div className="course-body">

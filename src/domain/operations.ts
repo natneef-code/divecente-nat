@@ -1,4 +1,14 @@
 import {
+  canEquip,
+  hasAssignment,
+  qualificationIssue,
+  sessionsFor,
+  sessionsOverlap,
+  operationalReadiness,
+} from "./policies";
+import { assignTeam } from "./staffing";
+import { makeSessions } from "./records";
+import {
   type Store,
   type Actor,
   type Customer,
@@ -198,26 +208,20 @@ export function assignInstructor(
   activityId: string,
   personId: string | null,
 ): Store {
-  requireStaff(a);
-  const s = structuredClone(source);
-  const activity = s.activities.find((x) => x.id === activityId);
-  if (!activity) throw new Error("Activity not found.");
-  if (personId) {
-    const problem = instructorIssue(s, activity, personId);
-    if (problem) throw new Error(problem);
-  }
-  activity.instructorId = personId;
-  for (const b of s.bookings.filter((b) => b.activityId === activityId))
-    notify(
-      s,
-      a,
-      b.id,
-      "Schedule change",
-      `${staffName(s, personId)} assigned to your course block.`,
-    );
-  event(s, a, activity.id, "Manual instructor assignment");
-  return s;
+  if (
+    personId &&
+    source.staffMembers.find((p) => p.id === personId)?.role !== "instructor"
+  )
+    throw new Error("Choose an Instructor for this legacy assignment action.");
+  return assignTeam(
+    source,
+    a,
+    activityId,
+    personId ? [personId] : [],
+    personId,
+  );
 }
+
 export function saveCourse(source: Store, a: Actor, input: Course): Store {
   requireManager(a);
   if (
@@ -229,12 +233,14 @@ export function saveCourse(source: Store, a: Actor, input: Course): Store {
     input.depositBps > 10000 ||
     !Number.isInteger(input.capacity) ||
     input.capacity < 1 ||
-    input.capacity > 4 ||
+    input.capacity > 100 ||
     !Number.isInteger(input.durationDays) ||
     input.durationDays < 1 ||
     input.durationDays > 30
   )
-    throw new Error("Check name, price, deposit, duration and capacity (1–4).");
+    throw new Error(
+      "Check name, price, deposit, duration and capacity (1–100).",
+    );
   const s = structuredClone(source);
   if (
     s.activities.some(
@@ -274,7 +280,7 @@ export function publishActivity(
     !input.boat.trim() ||
     !Number.isInteger(input.capacity) ||
     input.capacity < 1 ||
-    input.capacity > 4
+    input.capacity > 100
   )
     throw new Error("Check course, dates, time, site, boat and capacity.");
   const activity = { ...input, id: id() };
@@ -288,6 +294,12 @@ export function publishActivity(
   )
     throw new Error("Boat schedule conflict: choose another boat or date.");
   s.activities.push(activity);
+  s.sessions.push(
+    ...makeSessions(
+      activity,
+      s.courses.find((c) => c.id === activity.courseId)!,
+    ),
+  );
   event(s, a, activity.id, "Availability published");
   return s;
 }
@@ -346,11 +358,25 @@ export function saveTraining(
   const b = s.bookings.find((b) => b.id === e?.bookingId);
   const activity = s.activities.find((x) => x.id === b?.activityId);
   if (!e || !b || !activity) throw new Error("Enrolment not found.");
+  const external =
+    a.role === "manager" &&
+    input.status === "Processed externally" &&
+    e.status === "Ready for SSI processing";
   if (
-    a.role !== "manager" &&
-    !(a.role === "instructor" && activity.instructorId === a.id)
+    !external &&
+    !(
+      a.role === "instructor" &&
+      hasAssignment(s, a, activity.id) &&
+      sessionsFor(s, activity).some(
+        (x) => !qualificationIssue(s, a.id, activity, x),
+      )
+    )
   )
-    throw new Error("Permission denied: assigned instructor or manager only.");
+    throw new Error(
+      "Permission denied: qualified assigned Instructor required for training approval.",
+    );
+  if (s.courses.find((c) => c.id === activity.courseId)?.kind === "fun-dive")
+    throw new Error("Fun Dive has no training enrolment.");
   if (!["Checked in", "In progress", "Completed"].includes(b.status))
     throw new Error("Check the group in before updating training.");
   if (
@@ -412,7 +438,6 @@ export function allocateEquipment(
   bookingId: string,
   participantId: string,
 ): Store {
-  requireStaff(a);
   const s = structuredClone(source);
   const item = s.equipmentItems.find((i) => i.id === itemId);
   const b = s.bookings.find((b) => b.id === bookingId);
@@ -427,6 +452,10 @@ export function allocateEquipment(
     throw new Error(
       "Choose an active booking, participant and inventory item.",
     );
+  if (!canEquip(s, a, activity.id))
+    throw new Error(
+      "Permission denied: assigned Instructor/Divemaster or Front Desk required.",
+    );
   if (item.status !== "Available" || item.nextMaintenance < activity.endDate)
     throw new Error(
       "Item is out of service or maintenance is due before this activity ends.",
@@ -437,9 +466,11 @@ export function allocateEquipment(
         x.itemId === itemId &&
         x.status !== "Returned" &&
         (x.status === "Checked out" ||
-          overlaps(
-            activity,
-            s.activities.find((y) => y.id === x.activityId)!,
+          sessionsFor(s, activity).some((one) =>
+            sessionsFor(
+              s,
+              s.activities.find((y) => y.id === x.activityId)!,
+            ).some((two) => sessionsOverlap(one, two)),
           )),
     )
   )
@@ -465,7 +496,6 @@ export function moveEquipment(
   status: "Checked out" | "Returned",
   damage = "",
 ): Store {
-  requireStaff(a);
   const s = structuredClone(source);
   const allocation = s.allocations.find((x) => x.id === key);
   if (
@@ -474,6 +504,8 @@ export function moveEquipment(
     (status === "Checked out" && allocation.status !== "Reserved")
   )
     throw new Error("Allocation cannot make this transition.");
+  if (!canEquip(s, a, allocation.activityId))
+    throw new Error("Permission denied: assignment required.");
   const item = s.equipmentItems.find((i) => i.id === allocation.itemId)!;
   if (
     status === "Checked out" &&
@@ -501,6 +533,45 @@ export function moveEquipment(
     );
   } else event(s, a, key, "Equipment checked out");
   return s;
+}
+export function correctAllocation(
+  source: Store,
+  a: Actor,
+  key: string,
+  itemId: string,
+  reason: string,
+): Store {
+  requireStaff(a);
+  if (reason.trim().length < 8)
+    throw new Error("Enter a meaningful correction reason.");
+  const s = structuredClone(source),
+    old = s.allocations.find((x) => x.id === key);
+  if (!old || old.status !== "Reserved")
+    throw new Error(
+      "Only reserved equipment can be corrected; return checked-out equipment first.",
+    );
+  if (itemId === old.itemId)
+    throw new Error("Choose a different replacement item.");
+  const previous = s.equipmentItems.find((x) => x.id === old.itemId),
+    replacement = s.equipmentItems.find((x) => x.id === itemId);
+  if (previous?.category !== replacement?.category)
+    throw new Error("Replacement must use the same equipment category.");
+  old.status = "Returned";
+  old.returnedAt = now();
+  const next = allocateEquipment(
+    s,
+    a,
+    itemId,
+    old.bookingId,
+    old.participantId,
+  );
+  event(
+    next,
+    a,
+    key,
+    `Allocation corrected ${old.itemId} → ${itemId}: ${clean(reason)}`,
+  );
+  return next;
 }
 export function serviceEquipment(
   source: Store,
@@ -714,40 +785,13 @@ export function refundBooking(
 }
 export function operationalAlerts(s: Store) {
   const alerts: { id: string; kind: string; message: string }[] = [];
-  for (const x of s.activities) {
-    if (!x.instructorId)
+  for (const x of s.activities)
+    for (const [i, message] of operationalReadiness(s, x).issues.entries())
       alerts.push({
-        id: `unassigned-${x.id}`,
-        kind: "Schedule",
-        message: `${x.date}: ${s.courses.find((c) => c.id === x.courseId)?.name} needs an instructor.`,
+        id: `${x.id}-${i}`,
+        kind: "Operations",
+        message: `${x.date}: ${message}`,
       });
-    else {
-      const issue = instructorIssue(s, x, x.instructorId);
-      if (issue)
-        alerts.push({
-          id: `instructor-${x.id}`,
-          kind: "Schedule",
-          message: `${x.date} · ${staffName(s, x.instructorId)}: ${issue}`,
-        });
-    }
-    if (
-      x.boat !== "Shore-based" &&
-      s.activities.some(
-        (y) => y.id !== x.id && y.boat === x.boat && overlaps(x, y),
-      )
-    )
-      alerts.push({
-        id: `boat-${x.id}`,
-        kind: "Schedule",
-        message: `${x.date}: ${x.boat} has overlapping activities.`,
-      });
-    if (reserved(s, x.id) > Math.min(4, x.capacity))
-      alerts.push({
-        id: `capacity-${x.id}`,
-        kind: "Capacity",
-        message: `${x.date}: activity is over capacity.`,
-      });
-  }
   for (const i of s.equipmentItems.filter(
     (i) => i.nextMaintenance <= bangkokDate() || i.status !== "Available",
   ))
