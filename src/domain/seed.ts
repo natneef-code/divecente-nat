@@ -1,3 +1,4 @@
+import { operationsSeed } from "./records";
 import { bangkokDate, type Store } from "./model";
 export function seed(now = new Date()): Store {
   const today = bangkokDate(now);
@@ -8,6 +9,7 @@ export function seed(now = new Date()): Store {
   };
   const timestamp = now.toISOString();
   return {
+    ...operationsSeed(now),
     version: 1,
     courses: [
       {
@@ -82,8 +84,11 @@ export function seed(now = new Date()): Store {
             : c === 1
               ? "Koh Tao dive sites"
               : "Natneef classroom",
-        instructorId: i === 2 ? null : "instructor-mali",
-        boat: c === 2 ? "Shore-based" : "Blue Current",
+        instructorId:
+          i === 2
+            ? null
+            : ["instructor-mali", "instructor-ben", "instructor-lin"][c],
+        boat: c === 2 ? "Shore-based" : c === 0 ? "Blue Current" : "Sea Willow",
         capacity: 4,
       })),
     ),

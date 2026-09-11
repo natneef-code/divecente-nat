@@ -34,3 +34,6 @@ On 2026-09-09, all eight required direct routes returned HTTP 200 from the rebui
 - Preview: https://deploy-preview-1--divecente-nat.netlify.app
 
 No critical issue remains in the tested Phase 2 scope. Remaining overall-MVP functionality and production limitations are documented in PROGRESS.md and SECURITY_REVIEW.md.
+
+## Recovery baseline — 2026-09-10
+Fixed CRM JSX syntax. Production build passed; 9 domain tests passed; 20 desktop/mobile checks passed in 20.8s. This baseline precedes the confirmed staffing/Fun Dive/equipment amendment; superseded assertions will be updated explicitly.

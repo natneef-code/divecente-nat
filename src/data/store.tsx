@@ -14,6 +14,7 @@ import {
   type Store,
 } from "../domain/model";
 import { seed } from "../domain/seed";
+import { migrateStore } from "../domain/records";
 export const STORAGE_KEY = "diveos-demo-v1";
 function load(): Store {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -33,7 +34,7 @@ function load(): Store {
     throw new Error(
       "Saved demo data is incompatible. Reset the fictional demo to continue.",
     );
-  return s;
+  return migrateStore(s);
 }
 const Context = createContext<null | {
   state: Store;

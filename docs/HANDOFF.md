@@ -1,10 +1,10 @@
 # Handoff
 
 1. **Current branch:** build/diveos-mvp.
-2. **Latest relevant commit:** d4205ba (verified CI test fix); 5f3345b is the published Phase 2 implementation; aa4c5d7 is foundation and e8a9c12 is the first definitions checkpoint. Use git log -5 --oneline for the current tip.
+2. **Latest relevant commit:** eb26aab (Phase 2 handoff, CI run 34308268564 passed); d4205ba (verified CI test fix); 5f3345b is the published Phase 2 implementation; aa4c5d7 is foundation and e8a9c12 is the first definitions checkpoint. Use git log -5 --oneline for the current tip.
 3. **Current working state:** runnable React/TypeScript/Vite demo with connected Phase 1/2 workflows. Repo: /Users/kittipa/Documents/Codex/divecente-nat. Original index retained; user-created Doc/ and .DS_Store left alone/ignored.
 4. **Completed:** full Master Prompt, permanent rules, continuity docs; public overview/catalogue/details; four demo roles; booking, participants/equipment/document/terms flow; calculated QR deposit and Wise review; customer portal, staff list/confirmation/check-in; daily/weekly/list calendar; domain tests, browser tests, accessibility fixes and CI.
-5. **In progress:** None for the requested Phase 1/2 delivery. PR #1 is open; Netlify preview and GitHub CI verified on 2026-09-09.
+5. **In progress:** Phase 3 CRM, scheduling, training, documents and equipment. PR #1 is open; Netlify preview and GitHub CI verified on 2026-09-09.
 6. **Exact next task:** Begin the first incomplete Phase 3 task: extend the minimal customer model and add connected CRM/enquiry management, then manual instructor assignment with overlap tests. Reuse the existing domain/store architecture. Never merge PR #1 without explicit approval.
 7. **Remaining backlog:** Phase 3 CRM, product management, manual instructor assignment/conflicts, training, equipment assets, full document review; Phase 4 management; full Phase 5. Do not present these as completed.
 8. **Known bugs/limitations:** device-local storage, no cross-device sync or production authentication; concurrent tabs are not database transactions; demo classes reserve capacity indefinitely; no real legal/medical review. Existing production reference returned HTTP 404 on 2026-09-08, unchanged by this work.
@@ -24,3 +24,6 @@
 - Direct /, /demo, /login, /courses, /courses/open-water, /portal, /app and /app/calendar routes returned HTTP 200; CSP and nosniff headers were present.
 - Deployed JavaScript exactly matched the tested production bundle. This final documentation commit changes no application or test behavior.
 - No production secrets required. Demo roles: Customer/Alex, Front Desk/Nok, Instructor/Mali, Manager/Nat at /demo, no password.
+
+## Active continuation — 2026-09-10
+Current branch build/diveos-mvp; last published checkpoint eb26aab. Recovery build and 9/20 tests pass after CRM syntax fix. Unfinished Phase 3 operations/interfaces preserved in this checkpoint; new UI is not wired yet. Exact next task: implement the latest amendment saved verbatim in MASTER_PROMPT, replacing customer size selection and fixed capacity rules, adding Fun Dive/Refresher and Instructor/DM staffing/asset workflows. No credential blocker. Keep existing preview and unmerged PR #1.

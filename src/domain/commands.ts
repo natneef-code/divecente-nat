@@ -1,3 +1,4 @@
+import { syncBookingRecords } from "./records";
 import {
   bangkokDate,
   type Actor,
@@ -47,7 +48,7 @@ export function quote(
     throw new Error("Booking total is too large.");
   return { total, deposit: Math.round((total * bps) / 10000) };
 }
-const event = (s: Store, a: Actor, id: string, action: string) =>
+export const event = (s: Store, a: Actor, id: string, action: string) =>
   s.events.unshift({
     id: crypto.randomUUID(),
     actorId: a.id,
@@ -55,12 +56,13 @@ const event = (s: Store, a: Actor, id: string, action: string) =>
     action,
     at: new Date().toISOString(),
   });
-function setStatus(b: Booking, status: Status) {
+export function setStatus(b: Booking, status: Status) {
   b.status = status;
   b.updatedAt = new Date().toISOString();
   b.history.push({ status, at: b.updatedAt });
 }
 export type BookingInput = {
+  customerId?: string;
   activityId: string;
   participants: { name: string; size: string; computer: boolean }[];
   documents: boolean;
@@ -73,11 +75,12 @@ export function createBooking(
   a: Actor,
   input: BookingInput,
 ): { state: Store; id: string } {
-  if (
-    a.role !== "customer" ||
-    !a.customerId ||
-    !source.customers.some((c) => c.id === a.customerId)
-  )
+  const ownerId = staff(a)
+    ? input.customerId
+    : a.role === "customer"
+      ? a.customerId
+      : undefined;
+  if (!ownerId || !source.customers.some((c) => c.id === ownerId))
     throw new Error("Permission denied: choose the customer demo to book.");
   const activity = source.activities.find((x) => x.id === input.activityId);
   const course = source.courses.find((x) => x.id === activity?.courseId);
@@ -118,7 +121,7 @@ export function createBooking(
   const now = new Date().toISOString();
   s.bookings.unshift({
     id,
-    customerId: a.customerId,
+    customerId: ownerId,
     activityId: activity.id,
     participants: input.participants.map((p) => ({
       id: crypto.randomUUID(),
@@ -138,6 +141,7 @@ export function createBooking(
     updatedAt: now,
     history: [{ status: "Awaiting payment", at: now }],
   });
+  syncBookingRecords(s, s.bookings[0]);
   event(s, a, id, "Booking created");
   return { state: s, id };
 }
@@ -227,6 +231,14 @@ export function submitDocuments(source: Store, a: Actor, id: string): Store {
     p.medical = "Submitted";
   });
   b.updatedAt = new Date().toISOString();
+  s.documents
+    .filter((d) => d.bookingId === id)
+    .forEach((d) => {
+      d.status = "Submitted";
+      d.submittedAt = b.updatedAt;
+      delete d.reviewerId;
+      delete d.reviewedAt;
+    });
   event(
     s,
     a,

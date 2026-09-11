@@ -11,3 +11,5 @@
 - Deposits apply to total including optional equipment. QR graphic is a non-scannable demo placeholder. Wise uses fictional proof references, no file upload or real bank details.
 - Demo documents record acknowledgements only; they do not establish medical clearance, legally binding consent or certification.
 - Production reference returned HTTP 404 during direct network inspection on 2026-09-08. Preserve index as the content reference and do not modify production.
+
+- 2026-09-09: User requested continuation after verified Phase 2 delivery. Proceed to Phase 3; retain the same branch/PR and never merge without approval. Expand stored data with an additive migration that preserves existing bookings. Course blocks reserve full inclusive days for conservative instructor/boat/equipment overlap checks.

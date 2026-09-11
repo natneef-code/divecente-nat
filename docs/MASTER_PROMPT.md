@@ -1043,3 +1043,366 @@ Public Open Water course → booking → 10% demo deposit → booking confirmati
 Run the build and relevant tests, commit all working changes, push the branch, open a pull request, and return the verified Netlify Deploy Preview URL.
 
 Continue autonomously unless there is a genuine blocker. Do not merge into `main` without my explicit approval.
+
+
+# Confirmed business-rule amendment — 2026-09-10
+
+This user-approved amendment supersedes conflicting original equipment, role, capacity and staffing requirements above. The original prompt is retained for history.
+
+Continue the DiveOS project from the current local workspace and repository state.
+
+Phase 1–2 is already implemented, tested, published to `build/diveos-mvp`, and available through PR #1. Do not rebuild or replace the verified Phase 1–2 vertical slice.
+
+Phase 3 contains unfinished local changes. Before modifying files:
+
+1. Read `AGENTS.md` and all project documents in `docs/`.
+2. Inspect the current branch, `git status`, local uncommitted files, and recent commits.
+3. Preserve all recoverable Phase 3 work.
+4. Fix the existing JSX syntax error in `CRM.tsx`.
+5. Run the build and relevant tests to establish the current baseline.
+6. Create a safe checkpoint before continuing major implementation.
+
+Apply the following confirmed business-rule corrections and additions.
+
+## 1. Customer equipment selection
+
+Customers must not select equipment sizes or individual equipment asset numbers during a course or Fun Dive booking.
+
+Remove customer-facing controls that ask customers to select:
+
+* Wetsuit size
+* Fin size
+* Mask size or model
+* Regulator asset
+* Dive Computer asset
+* Any individual equipment code or inventory number
+
+Customers may select only the rental category or rental package when applicable. They must never reserve a specific physical asset themselves.
+
+Exact equipment fitting and allocation are operational staff responsibilities.
+
+## 2. Equipment assignment responsibility
+
+Instructor or Divemaster must be able to select and assign:
+
+* Equipment category
+* Size
+* Individual asset code or asset number
+* Participant receiving the equipment
+* Check-out status
+* Return status
+* Damage or maintenance notes
+
+Front Desk must be able to view and correct equipment assignments.
+
+Example:
+
+* Participant: Alex Morgan
+* Equipment: Fins
+* Size: M
+* Asset number: FIN-010
+
+Use stable and unique asset identifiers.
+
+Prevent the same physical item from being assigned to overlapping active activities.
+
+Maintain assignment history rather than replacing previous records without an audit event.
+
+## 3. Course equipment rules
+
+For courses containing in-water training sessions, the standard required equipment is included in the course price:
+
+* Wetsuit
+* Fins
+* Regulator
+* Mask
+* Dive Computer
+
+The customer does not choose sizes or assets during booking.
+
+Instructor or Divemaster fits and assigns the individual items later.
+
+Equipment inclusion must be configurable by Course Template or Session so future courses without in-water training can use different rules.
+
+Do not charge a separate Dive Computer rental fee when it is included in an in-water course.
+
+## 4. Fun Dive definition
+
+Add Fun Dive as a distinct product/activity type.
+
+A Fun Dive is recreational diving for a customer who already holds a recognized diving certification. It is not a training course.
+
+Fun Dive bookings must collect or confirm:
+
+* Certification agency
+* Certification level
+* Certification number
+* Number of logged dives
+* Date of last dive
+
+The system must distinguish Fun Dive participants from course students.
+
+Fun Dive activities do not create course-training milestones or certification-processing records.
+
+## 5. Fun Dive equipment options
+
+For a Fun Dive, customers may select:
+
+* No rental equipment
+* Full Equipment Package
+* Individual rental categories
+
+The Full Equipment Package includes:
+
+* Wetsuit
+* Fins
+* Regulator
+* Mask
+* Dive Computer
+
+Customers selecting individual rentals may separately select Dive Computer rental.
+
+Dive Computer is not automatically included in the base Fun Dive price.
+
+Dive Computer rental is charged per day.
+
+The rental price is not yet confirmed. Make it Manager-configurable and use a clearly labelled fictional demo price until the real price is provided.
+
+Customers select only the package or equipment category. Instructor/Divemaster later assigns the exact size and physical asset number.
+
+## 6. Refresher rule
+
+If the customer’s last recorded dive was more than three months before the Fun Dive date, a Refresher becomes mandatory.
+
+The customer must still be allowed to create the Fun Dive booking.
+
+The system must automatically:
+
+1. Detect the gap between the last-dive date and Fun Dive date.
+2. Add a mandatory Refresher requirement to the booking.
+3. Display the requirement clearly to the customer.
+4. Display it to Front Desk, Instructor, Divemaster, and Manager.
+5. Add the Refresher as a required booking line item or linked required activity.
+6. Mark the Fun Dive booking as requiring Refresher completion.
+7. Prevent Fun Dive check-in or operational clearance until the required Refresher is scheduled and completed.
+
+The three-month threshold must be configurable by Manager, with three months as the default.
+
+The Refresher price is not yet confirmed. Make it Manager-configurable and use a clearly labelled fictional demo price.
+
+Record any Manager override as an audit event; do not silently remove the requirement.
+
+## 7. Staff roles
+
+Support these distinct operational roles:
+
+* Instructor
+* Divemaster
+* Front Desk
+* Manager
+
+Instructor and Divemaster are not interchangeable in every workflow.
+
+### Course rules
+
+Every in-water course Session must have at least one assigned Instructor.
+
+A Divemaster may:
+
+* Assist the Instructor
+* Help manage students
+* Prepare participants
+* Fit and allocate equipment
+* Assist with operational check-in
+* Record permitted operational notes
+
+A Divemaster must not be the only responsible training professional for an in-water course Session.
+
+Only an appropriately authorized Instructor may own or approve course-training completion.
+
+### Fun Dive rules
+
+A qualified Instructor or Divemaster may lead a Fun Dive.
+
+The lead and assisting professionals must appear in the operational schedule.
+
+## 8. Staffing ratio
+
+Use a default staffing ratio of one qualified dive professional per four participants.
+
+For courses:
+
+* One to four students require at least one Instructor.
+* Five to eight students require at least one Instructor plus one additional Instructor or Divemaster.
+* Every additional group of up to four students requires another qualified Instructor or Divemaster.
+* At least one Instructor remains mandatory for every in-water course Session.
+
+For Fun Dives:
+
+* One to four divers require one qualified Instructor or Divemaster.
+* Five to eight divers require two qualified Instructors/Divemasters.
+* Continue using one professional for every additional group of up to four divers.
+
+Manager must be able to override or configure staffing requirements separately for:
+
+* Course Template
+* Individual Session
+* Fun Dive Trip
+* Dive Site
+
+A stricter configured requirement must override the default ratio.
+
+The system must calculate and display:
+
+* Required professional count
+* Assigned professional count
+* Missing staff count
+* Whether the activity is operationally ready
+
+Do not allow an activity to be marked operationally ready if staffing is below the effective requirement.
+
+Detect overlapping Instructor and Divemaster assignments.
+
+## 9. Capacity model correction
+
+Do not treat four participants as a permanent universal maximum.
+
+Separate:
+
+* Participant capacity
+* Staffing coverage
+* Boat capacity
+* Equipment availability
+* Course or Trip configured maximum
+
+An activity may contain more than four participants when sufficient qualified professionals and operational capacity are assigned.
+
+For example:
+
+* Six course students may be accepted when at least one Instructor and one additional Instructor or Divemaster are assigned, provided the Course/Session maximum, boat capacity, and equipment availability permit it.
+* Six Fun Dive customers require at least two qualified leaders or assistants under the default 4:1 ratio.
+
+The Manager may configure a lower or higher maximum for a specific Course, Session, Trip, or Dive Site.
+
+## 10. Required UI changes
+
+Update or add connected UI for:
+
+### Customer booking
+
+* Remove customer equipment-size selection.
+* Remove customer asset-number selection.
+* For in-water courses, show standard equipment as included.
+* For Fun Dive, allow Full Equipment Package or individual rental-category selection.
+* Show Dive Computer rental as per-day when selected individually.
+* Collect certification and dive-experience information for Fun Dive.
+* Show mandatory Refresher clearly when triggered.
+
+### Equipment workspace
+
+Allow Instructor, Divemaster, and Front Desk to:
+
+* View participants requiring equipment
+* Select equipment type
+* Select size
+* Assign a unique asset number
+* Detect conflicts
+* Mark checked out
+* Mark returned
+* Record damage or maintenance issues
+
+### Staffing workspace
+
+Allow authorized staff to:
+
+* Assign Instructor
+* Assign Divemaster
+* See the effective staffing ratio
+* See assigned versus required staff
+* Detect schedule overlaps
+* See missing-Instructor errors for courses
+* See whether the activity is operationally ready
+
+### Manager configuration
+
+Allow Manager to configure:
+
+* Default staffing ratio
+* Course-specific staffing requirement
+* Session-specific staffing requirement
+* Trip-specific staffing requirement
+* Dive Site-specific requirement
+* Refresher threshold
+* Refresher price
+* Equipment-package contents
+* Dive Computer daily rental price
+* Activity participant maximum
+
+## 11. Data migration
+
+Preserve existing fictional bookings and browser-local demo data where reasonably possible.
+
+Use additive versioned migration for the existing localStorage data.
+
+Do not break the verified Phase 1–2 booking, QR, Wise, portal, staff-list, calendar, document, capacity, or route-permission behavior.
+
+Where the previous fixed four-person capacity conflicts with the new staffing-based capacity rules, migrate to the new model while retaining four as the default ratio unit rather than the universal maximum.
+
+## 12. Tests
+
+Add or update tests for at least:
+
+1. Course customer cannot select equipment size or asset number.
+2. Course containing in-water training includes Dive Computer without a separate rental charge.
+3. Fun Dive base price excludes Dive Computer.
+4. Fun Dive Full Equipment Package includes Dive Computer.
+5. Individual Fun Dive Dive Computer rental is charged per day.
+6. Instructor/DM assigns exact equipment size and asset number.
+7. Front Desk can correct an equipment assignment.
+8. An equipment asset cannot be assigned to overlapping activities.
+9. Fun Dive requires certification information.
+10. More than three months since last dive automatically adds Refresher.
+11. A Refresher-required customer may create a booking.
+12. Fun Dive check-in is blocked until the required Refresher is completed.
+13. One to four course students require one Instructor.
+14. Six course students require one Instructor plus one Instructor or Divemaster.
+15. A course Session cannot be operationally ready with only a Divemaster.
+16. Six Fun Dive customers require two qualified professionals under the default rule.
+17. Manager-configured Course/Session/Trip/Dive Site rules override defaults.
+18. Instructor and Divemaster schedule overlaps are detected.
+19. Existing Phase 1–2 workflows continue to pass.
+20. Desktop and mobile layouts remain functional.
+
+## 13. Documentation and continuity
+
+Update:
+
+* `docs/MASTER_PROMPT.md`
+* `docs/PROJECT_SPEC.md`
+* `docs/ARCHITECTURE.md`
+* `docs/DECISIONS.md`
+* `docs/IMPLEMENTATION_PLAN.md`
+* `docs/PROGRESS.md`
+* `docs/HANDOFF.md`
+* `docs/TEST_STATUS.md`
+* `docs/SECURITY_REVIEW.md` when applicable
+
+Record all fictional placeholder prices and unresolved operational assumptions clearly.
+
+## 14. Completion workflow
+
+After fixing and implementing this scope:
+
+1. Run formatting checks.
+2. Run domain/unit tests.
+3. Run the production build.
+4. Run desktop and mobile browser tests.
+5. Inspect the resulting UI.
+6. Update all continuity documents.
+7. Commit safe working checkpoints.
+8. Push to the existing `build/diveos-mvp` branch.
+9. Update PR #1.
+10. Verify the Netlify Deploy Preview.
+11. Return the PR URL, verified Preview URL, test results, completed features, unresolved assumptions, and remaining Phase 3 backlog.
+
+Do not merge PR #1 into `main` without my explicit approval.

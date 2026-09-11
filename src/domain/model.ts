@@ -43,6 +43,17 @@ export type Customer = {
   email: string;
   certification: string;
   loggedDives: number;
+  preferredName?: string;
+  phone?: string;
+  dateOfBirth?: string;
+  nationality?: string;
+  language?: string;
+  emergencyName?: string;
+  emergencyPhone?: string;
+  certificationOrg?: string;
+  certificationNumber?: string;
+  lastDive?: string;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -52,7 +63,7 @@ export type Participant = {
   size: string;
   equipment: "Included set" | "Set + computer";
   documents: "Not started" | "Submitted";
-  medical: "Not started" | "Submitted";
+  medical: MedicalStatus;
   createdAt: string;
 };
 export type Booking = {
@@ -74,7 +85,7 @@ export type Payment = {
   id: string;
   bookingId: string;
   amount: number;
-  method: "QR" | "Wise";
+  method: "QR" | "Wise" | "Manual";
   status: "Pending" | "Approved" | "Rejected";
   reference: string;
   createdAt: string;
@@ -96,6 +107,17 @@ export type Store = {
   bookings: Booking[];
   payments: Payment[];
   events: AuditEvent[];
+  schemaRevision: 2;
+  staffMembers: StaffMember[];
+  enquiries: Enquiry[];
+  documents: DocumentRecord[];
+  enrolments: Enrolment[];
+  equipmentItems: EquipmentItem[];
+  allocations: Allocation[];
+  maintenance: MaintenanceRecord[];
+  notifications: NotificationEvent[];
+  refunds: Refund[];
+  settings: Settings;
 };
 export const roles: {
   id: Role;
@@ -160,3 +182,124 @@ export function bangkokDate(now = new Date()) {
     day: "2-digit",
   }).format(now);
 }
+
+export type MedicalStatus =
+  "Not started" | "Submitted" | "Review required" | "Cleared" | "Expired";
+export type StaffMember = {
+  id: string;
+  name: string;
+  role: Role;
+  email: string;
+  phone: string;
+  active: boolean;
+  qualifiedCourseIds: string[];
+  qualificationExpiry: string;
+  availableFrom: string;
+  availableTo: string;
+  createdAt: string;
+  updatedAt: string;
+};
+export type Enquiry = {
+  id: string;
+  name: string;
+  email: string;
+  courseId: string;
+  message: string;
+  status: "New" | "Contacted" | "Converted" | "Closed";
+  customerId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+export type DocumentRecord = {
+  id: string;
+  bookingId: string;
+  participantId: string;
+  type: string;
+  status:
+    "Not started" | "Submitted" | "Approved" | "Review required" | "Expired";
+  version: string;
+  submittedAt?: string;
+  reviewedAt?: string;
+  reviewerId?: string;
+  expiry?: string;
+  notes: string;
+};
+export const trainingStates = [
+  "Enrolled",
+  "Scheduled",
+  "In training",
+  "Additional training required",
+  "Training complete",
+  "Ready for SSI processing",
+  "Processed externally",
+] as const;
+export type TrainingStatus = (typeof trainingStates)[number];
+export type Enrolment = {
+  id: string;
+  bookingId: string;
+  participantId: string;
+  status: TrainingStatus;
+  attendance: boolean[];
+  milestones: boolean[];
+  notes: string;
+  updatedAt: string;
+};
+export type EquipmentItem = {
+  id: string;
+  category: string;
+  brand: string;
+  model: string;
+  size: string;
+  serial: string;
+  status: "Available" | "Maintenance" | "Damaged" | "Lost" | "Retired";
+  lastInspection: string;
+  nextMaintenance: string;
+  damageNotes: string;
+  createdAt: string;
+  updatedAt: string;
+};
+export type Allocation = {
+  id: string;
+  itemId: string;
+  bookingId: string;
+  participantId: string;
+  activityId: string;
+  status: "Reserved" | "Checked out" | "Returned";
+  createdAt: string;
+  returnedAt?: string;
+};
+export type MaintenanceRecord = {
+  id: string;
+  itemId: string;
+  date: string;
+  notes: string;
+  nextDue: string;
+  actorId: string;
+};
+export type NotificationEvent = {
+  id: string;
+  bookingId?: string;
+  customerId?: string;
+  type: string;
+  message: string;
+  channels: string[];
+  createdAt: string;
+  read: boolean;
+  simulated: true;
+};
+export type Refund = {
+  id: string;
+  bookingId: string;
+  amount: number;
+  reason: string;
+  actorId: string;
+  createdAt: string;
+};
+export type Settings = {
+  name: string;
+  currency: "THB";
+  timezone: "Asia/Bangkok";
+  language: string;
+  defaultDepositBps: number;
+  channels: string[];
+};

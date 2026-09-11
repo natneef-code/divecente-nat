@@ -5,7 +5,7 @@ Read docs/MASTER_PROMPT.md and every document in docs/ before continuing. The Ma
 
 ## Product and safety
 - Keep / a public overview; Try DiveOS links to /demo. Support the routes in PROJECT_SPEC.
-- Natneef Diving is fictional. Use English, THB integer satang, Asia/Bangkok, maximum four students, computed 10% deposit, manual instructor assignment.
+- Natneef Diving is fictional. Use English, THB integer satang, Asia/Bangkok, configurable participant capacity, default 4:1 qualified-professional ratio, computed 10% deposit and manual professional assignment. The 2026-09-10 amendment in MASTER_PROMPT overrides the original fixed four-student ceiling.
 - Browser demo data is fictional and device-local. Demo role selection is not secure authentication. Never collect real personal, medical, payment, or credential data.
 - Enforce role and ownership checks in application commands; production needs server authentication, authorization, validation, transactions, and row-level access.
 - Payments and notifications are simulations; no money movement or real messages. No official SSI integration or certification. Use Ready for SSI processing only for internal training status.
@@ -24,3 +24,6 @@ Read docs/MASTER_PROMPT.md and every document in docs/ before continuing. The Ma
 At session start read AGENTS.md and all docs; inspect git status, branch, recent commits; run current tests/build; resume the first incomplete IMPLEMENTATION_PLAN item. Do not restart working architecture without evidence.
 Update PROGRESS.md and HANDOFF.md after each meaningful milestone, before changing phase, before input requests, before ending, and when context is low. HANDOFF must contain branch, latest relevant commit, working state, completed/in-progress work, exact next task, backlog, bugs, tests, commands, environment variable names, and blockers.
 Before ending: run relevant build/tests, update docs, commit, push, and report the exact continuation step. Record failures and limitations honestly. Keep assumptions in DECISIONS.md and module classifications in PROGRESS.md.
+
+## Confirmed operational rules (2026-09-10)
+Customers choose rental packages/categories only, never sizes or assets. Standard in-water course equipment includes a Dive Computer with no extra rental fee. Instructor/Divemaster fits and assigns assets; Front Desk can correct assignments with history/audit. Distinguish Instructor and Divemaster: course completion belongs to authorized Instructors and every in-water course session needs an Instructor; a qualified Instructor or DM may lead Fun Dives. Keep participant maximum, boat/site capacity, staffing and equipment availability separate. Stricter template/session/trip/site rules win. Fun Dive requires certification and experience, creates no training enrolment, and automatically adds a mandatory priced Refresher after the configured last-dive gap. Permit that booking, block check-in until Refresher scheduling/completion or audited Manager override. Preserve browser data with versioned migration and retain historical financial snapshots.

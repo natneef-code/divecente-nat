@@ -1,6 +1,6 @@
 # DiveOS project specification
 
-Authoritative full scope: MASTER_PROMPT.md. Current delivery: Phase 1 + Phase 2, then a tested Netlify Deploy Preview and unmerged PR.
+Authoritative full scope: MASTER_PROMPT.md. Phase 1/2 was delivered and preview-verified. The user requested continuation on 2026-09-09; Phase 3 core operations is active under the same unmerged PR.
 
 ## Experience
 Public overview at /; course catalogue /courses; details /courses/:courseId; demo selection /demo and /login; customer /portal; staff /app. Booking flow collects date, 1–4 named participants, equipment preferences, prerequisite acknowledgement, placeholder document acknowledgements, terms, and QR or Wise method. A booking created by the customer must appear in the same browser's customer portal, authorized staff list, and calendar. QR simulation records a deposit exactly once. Wise submission remains unpaid pending staff review.
