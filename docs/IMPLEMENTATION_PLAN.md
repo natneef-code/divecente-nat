@@ -20,7 +20,7 @@
 - [x] Manager settings, basic financial/operational reports, audit and notification previews.
 - [x] Additive browser migration preserving existing financial records.
 - [x] Domain/desktop/mobile regression and amended-rule tests added.
-- [ ] Final complete checks, current preview verification and publication checkpoint (record actual results in TEST_STATUS).
+- [x] Final complete checks, current preview verification and publication checkpoint (actual results in TEST_STATUS).
 
 ## Remaining Phase 3 backlog
 - [ ] Full product creation and availability publishing UI (existing product price/publication and capacity editing works; domain publishing command exists).

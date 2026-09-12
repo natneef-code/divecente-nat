@@ -1,6 +1,6 @@
 # Progress
 
-Phase 1–2 remains verified. The 2026-09-10 amended Phase 3 scope is implemented locally; publication and latest live verification are the current milestone. The full original five-phase MVP is not yet complete.
+Phase 1–2 remains verified. The 2026-09-10 amended Phase 3 scope is implemented, published to PR #1 and verified on its Netlify Deploy Preview. The full original five-phase MVP is not yet complete.
 
 | Module | Classification | Current behavior / remaining work |
 | --- | --- | --- |
@@ -21,8 +21,8 @@ Phase 1–2 remains verified. The 2026-09-10 amended Phase 3 scope is implemente
 | Reports/audit | Working with demo data | Basic payment/balance/training totals, operational alerts, audit history; richer reports remain |
 | Notifications | Simulated integration | Internal event/message previews; real providers and complete event coverage remain |
 | Browser migration | Complete and working | Additive revision 3, IDs and old financial snapshots retained; no reset required |
-| QA | Complete and working | 33 domain checks and 30 desktop/mobile cases passed locally; deployed verification pending |
-| PR/preview | Partially complete | Existing PR #1 and preview remain; amended commit publication and live QA pending |
+| QA | Complete and working | 33 domain checks passed locally; all 30 desktop/mobile cases passed locally and against the deployed preview |
+| PR/preview | Complete and working | PR #1 updated and unmerged; GitHub Actions and Netlify Deploy Preview passed for f3dcf65 |
 | Production database/auth/integrations | Recommended after MVP | Requires server implementation, credentials and operator/legal/privacy decisions; demo does not depend on credentials |
 
-Next: finish final checks, checkpoint/publish branch, update PR #1, run the suite against the deployed preview and verify direct routes/bundle. No merge authorized.
+Next: user reviews PR #1 and its Deploy Preview. Continue the remaining Phase 3 backlog after feedback. No merge is authorized.
