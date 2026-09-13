@@ -164,9 +164,11 @@ export function WorkspaceNav() {
           ) : (
             <>
               <NavLink to="/app" end>
-                {actor?.role === "instructor"
-                  ? "Assigned students"
-                  : "Bookings"}
+                {actor?.role === "manager"
+                  ? "Dashboard"
+                  : actor?.role === "instructor"
+                    ? "Assigned students"
+                    : "Bookings"}
               </NavLink>
               <NavLink to="/app/calendar">Operations calendar</NavLink>
               <NavLink to="/app/staffing">Staffing</NavLink>
@@ -183,8 +185,13 @@ export function WorkspaceNav() {
               )}
               {actor?.role === "manager" && (
                 <>
-                  <NavLink to="/app/settings">Settings</NavLink>
-                  <NavLink to="/app/reports">Reports & audit</NavLink>
+                  <NavLink to="/app/products">Products</NavLink>
+                  <NavLink to="/app/resources">Sites & boats</NavLink>
+                  <NavLink to="/app/mvp-reports">Reports</NavLink>
+                  <NavLink to="/app/notifications">Notifications</NavLink>
+                  <NavLink to="/app/system">System</NavLink>
+                  <NavLink to="/app/audit">Audit</NavLink>
+                  <NavLink to="/app/settings">Operational settings</NavLink>
                 </>
               )}
             </>

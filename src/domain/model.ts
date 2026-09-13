@@ -334,6 +334,10 @@ export type Refund = {
 };
 export type Settings = {
   name: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  bookingPrefix?: string;
+  taxPercent?: number;
   currency: "THB";
   timezone: "Asia/Bangkok";
   language: string;
@@ -360,12 +364,20 @@ export type StaffingRule = {
   minimum?: number;
   maximum?: number;
 };
-export type Boat = { id: string; name: string; capacity: number };
+export type Boat = {
+  id: string;
+  name: string;
+  capacity: number;
+  active?: boolean;
+  notes?: string;
+};
 export type DiveSite = {
   id: string;
   name: string;
   capacity: number;
   staffing: StaffingRule;
+  active?: boolean;
+  notes?: string;
 };
 export type Session = {
   id: string;

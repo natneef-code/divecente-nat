@@ -26,3 +26,10 @@ Staffing is evaluated for every session using Bangkok intervals (half-open time 
 6. Complete privacy, legal, operational, retention and recovery reviews before real use.
 
 Browser persistence is neither a secure authorization boundary nor a multi-user transactional database. Real authentication, database and integrations remain production work.
+
+## Phase 4 management layer
+`src/domain/management.ts` contains immutable, Manager-authorized commands for products, sites, boats, tenant settings and notification previews. Pages never write stored state directly. Product changes validate capacity against existing reservations, while booking totals and deposits remain immutable snapshots. Site and boat edits retain stable IDs so activity references survive configuration changes.
+
+`src/pages/Phase4.tsx` composes state-derived dashboard/report views and Manager administration routes. Reports calculate integer-satang totals from bookings and approved payments. The Notification Center records preview content, channels and read state but has no provider transport. Every Phase 4 mutation appends an audit event through the same persisted command transaction.
+
+The Phase 4 boundary intentionally excludes feedback-dependent operational UX. Equipment/maintenance screens, calendar views, staffing assignment, Activity default team, readiness/workload indicators and dependent dashboard widgets retain their Phase 3 implementation until the user approves a revision.

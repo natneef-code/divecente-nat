@@ -26,3 +26,12 @@
 - Refresher completion is an assigned professional's demo attestation. No real Refresher teaching content or linked instructional scheduling engine is claimed. Calendar-date scheduling allows same-day Refresher; precise before-dive timing and operator evidence remain post-MVP review.
 - Instructor owns training approval. Manager can record external processing only after Ready for SSI processing. DM has operational notes/fitting/check-in access and no course completion approval.
 - Demo medical acknowledgement remains distinct from actual clearance. Review-required/expired statuses block operations. Legal and safety review and real document workflows remain production gates.
+
+## 2026-09-13 — Feedback-independent Phase 4
+- The Manager landing route now presents a state-derived business dashboard. Existing booking access and the calendar entry point remain available, preserving Phase 1–3 journeys.
+- Product edits mutate catalogue configuration only. Every existing booking keeps its snapshotted total and deposit, so later price changes cannot rewrite booked financial history.
+- Reports derive from stored bookings and payments using integer satang. They are operational demo summaries, not accounting exports or recognized revenue statements.
+- Notification actions create preview records only. All records are marked simulated, include Internal as a channel, never contact a provider, and write an audit event that explicitly states nothing was sent.
+- Site, boat and general-setting changes are Manager-only and audit logged. Currency and time zone stay fixed at THB and Asia/Bangkok for this tenant.
+- Audit history remains an append-only application convention in device-local demo state; it is not tamper-resistant without a server database.
+- Equipment and maintenance UI, calendar including Month View, staffing assignment, Activity default team, staffing readiness/workload indicators, and dependent dashboard widgets are classified exactly as `Pending user-approved UX revision` and were not redesigned.

@@ -22,15 +22,33 @@
 - [x] Domain/desktop/mobile regression and amended-rule tests added.
 - [x] Final complete checks, current preview verification and publication checkpoint (actual results in TEST_STATUS).
 
-## Remaining Phase 3 backlog
-- [ ] Full product creation and availability publishing UI (existing product price/publication and capacity editing works; domain publishing command exists).
-- [ ] Staff profile/qualification/expiry/availability editing UI; workload review beyond current fixtures and conflict checks.
+## Approved Phase 4 scope
+- [x] Manager dashboard using booking, payment, training, document, enquiry and notification state.
+- [x] Filterable MVP reports with currency-safe financial totals.
+- [x] Internal Notification Center with simulated channel previews, unread state and audit records.
+- [x] Product/course create, edit, duplicate, pricing, deposit, capacity, inclusions and publication controls.
+- [x] Dive site and boat create/edit, active-state, capacity and notes management.
+- [x] General settings for public contact, language, booking prefix, defaults and simulated channels.
+- [x] Searchable audit history.
+- [x] Manager-only route and command enforcement, desktop/mobile accessibility and regression coverage.
+
+## Pending user-approved UX revision
+- [ ] Equipment workspace and maintenance UI.
+- [ ] Operations Calendar, including Month View.
+- [ ] Staffing assignment workflow and Activity default team.
+- [ ] Staffing readiness and workload indicators.
+- [ ] Dashboard widgets dependent on unfinished staffing or equipment UX decisions.
+
+## Remaining operational backlog
+- [ ] Availability publishing UI beyond current product publication and seeded schedules.
+- [ ] Staff profile/qualification/expiry/availability editing UI after staffing UX approval.
 - [ ] Rich session planning, precise Refresher time/qualified-provider evidence, per-session participant rosters and attendance beyond internal three-milestone demo.
 - [ ] Document-type-specific review, guardian/certification/ID evidence, secure upload/version/signing workflows.
 - [ ] Expanded discounts/taxes/add-ons, complete status transition coverage and payment reconciliation.
 
-## Phase 4–5 and production
-- [ ] Rich reporting/filtering, notification provider adapter/channel configuration and alert UX.
+## Phase 5 and production
+- [ ] Exportable accounting reports, refunds/reconciliation and server-backed reporting.
+- [ ] Real notification provider adapters after credentials and channel approval.
 - [ ] Production API/database/authentication with enforceable authorization and concurrent resource locks.
 - [ ] Real payment/messaging integrations only after credentials and support review.
 - [ ] Full manual accessibility, operational, legal/privacy and recovery review; broader browser coverage.

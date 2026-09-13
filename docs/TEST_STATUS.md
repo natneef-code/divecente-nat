@@ -46,3 +46,13 @@ Initial new-test failures were incorrect exact select-label locators and an outd
 Final local verification: formatting passed; 33 domain tests passed; TypeScript/Vite production build passed; all 30 desktop/mobile browser cases passed in 24.1 seconds, including axe checks on public and operational routes and zero horizontal overflow checks. Mobile staffing screenshot inspected: navigation wraps, cards and forms fit, controls remain readable. No unresolved test failures. Final overview copy is checked with the public accessibility suite before publication.
 
 Published verification on 2026-09-12: GitHub Actions `Verify DiveOS` run 34554247296 completed successfully for commit f3dcf65. Netlify reported a successful Deploy Preview for that commit. The complete 30-case Playwright suite then passed against `https://deploy-preview-1--divecente-nat.netlify.app` in 40.7 seconds on desktop and mobile, including QR/Wise persistence, Fun Dive/Refresher, equipment correction/damage, six-student staffing, manual booking/training, route permissions, accessibility and horizontal-overflow checks. Direct route loading is exercised by the deployed suite. No unresolved failures.
+
+## 2026-09-13 Phase 4 local validation
+- Formatting: passed.
+- Domain: 39/39 passed, including six new management cases for permissions, validation, stable-ID updates, immutable booked totals, settings preservation and simulated notification records.
+- Production build: passed with TypeScript and Vite.
+- Browser: 40/40 passed in 35.9 seconds across desktop and mobile. Ten new cases exercise dashboard/report filters, product publication and persistence, site/boat/settings management, Front Desk denial, notification preview/read/audit flow, seven direct Phase 4 routes, automated WCAG A/AA checks and horizontal overflow.
+- Regression: the original 30 browser cases passed unchanged after the Manager dashboard retained pending transfer review and calendar entry points.
+- Visual QA: desktop and mobile Manager Dashboard screenshots inspected. Navigation, actions, metric cards, empty states and deferred-work notice remain readable and contained at both widths.
+- One first full run exposed an obsolete Manager-home expectation after the dashboard became the role landing page; the established transfer-review metric and calendar link were restored. The final complete run passed. No application failure is reported as passing.
+- Deployment evidence remains pending publication of this local checkpoint and will be appended after CI and live-preview verification.
