@@ -1,6 +1,6 @@
 # Progress
 
-Phase 1–3 remains verified. The approved, feedback-independent Phase 4 scope is implemented locally and ready for publication to PR #1. The full original five-phase MVP is not yet complete.
+Phase 1–3 remains verified. The approved, feedback-independent Phase 4 scope is published to PR #1 and verified on its Netlify Deploy Preview. The full original five-phase MVP is not yet complete.
 
 | Module | Classification | Current behavior / remaining work |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ Phase 1–3 remains verified. The approved, feedback-independent Phase 4 scope i
 | Feedback-dependent operational UX | Pending user-approved UX revision | Equipment/maintenance UI; calendar including Month View; staffing assignment; Activity default team; readiness/workload indicators; dependent dashboard widgets |
 | Browser migration | Complete and working | Additive revision 3, IDs and old financial snapshots retained; no reset required |
 | QA | Complete and working | 39 domain checks and all 40 desktop/mobile browser cases passed locally, including Phase 1–3 regression and Phase 4 accessibility |
-| PR/preview | Complete and working | PR #1 updated and unmerged; GitHub Actions and Netlify Deploy Preview passed for f3dcf65 |
+| PR/preview | Complete and working | PR #1 updated and unmerged; GitHub Actions run 34817419820 and Netlify Deploy Preview passed for 3438695 |
 | Production database/auth/integrations | Recommended after MVP | Requires server implementation, credentials and operator/legal/privacy decisions; demo does not depend on credentials |
 
-Next: publish this Phase 4 checkpoint, verify CI and the existing Deploy Preview, then record deployed evidence. No merge is authorized.
+Next: await user review of the Phase 4 preview or continue only with an approved backlog item. No merge is authorized.
