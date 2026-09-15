@@ -1,6 +1,6 @@
 # Progress
 
-Phase 1–4 remains verified. The approved operational UX revision is complete locally and ready for publication to PR #1. The production system still depends on backend, provider and operator decisions.
+Phase 1–4 and the approved operational UX revision are published to PR #1 and verified on its Netlify Deploy Preview. The production system still depends on backend, provider and operator decisions.
 
 | Module | Classification | Current behavior / remaining work |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ Phase 1–4 remains verified. The approved operational UX revision is complete l
 | Operations calendar | Complete and working | Day/Week/Month/List, occupancy and professional coverage, status, links, filters and mobile reflow |
 | Browser migration | Complete and working | Additive revision 4; prior IDs, bookings, money, documents, training, allocations and events retained |
 | QA | Complete and working | 45 domain checks, production build and 52 desktop/mobile browser cases pass locally; eight screenshots inspected |
-| PR/preview | In progress | Backup branch verified at 3438695; operational checkpoint awaits publication/live verification; PR #1 remains unmerged |
+| PR/preview | Complete and working | Operational commit 15e502e, Actions run 34940591970 and all 52 live browser cases passed; backup branch remains at 3438695; PR #1 unmerged |
 | Production database/auth/integrations | Recommended after MVP | Requires server implementation, credentials and operator/legal/privacy decisions; demo does not depend on credentials |
 
-Next: publish this checkpoint, verify CI and the Netlify Deploy Preview, then record deployment evidence. No merge is authorized.
+Next: owner review of PR #1 and the verified preview. Resolve review findings or continue Phase 5; no merge is authorized.

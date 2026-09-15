@@ -39,7 +39,7 @@
 - [x] Boat manifests, groups, professional occupancy, configurable seats, suggestions, conflicts, audit and role permissions.
 - [x] Additive schema revision 4 and regression-safe migration.
 - [x] Domain, build, desktop/mobile workflow, accessibility, overflow and visual QA locally.
-- [ ] Publish checkpoint, verify CI and run the complete suite against the Netlify Deploy Preview.
+- [x] Publish checkpoint, verify CI and run the complete suite against the Netlify Deploy Preview.
 
 ## Remaining operational backlog
 - [ ] Availability publishing UI beyond current product publication and seeded schedules.
