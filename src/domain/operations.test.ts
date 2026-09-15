@@ -426,7 +426,7 @@ describe("confirmed operating rules", () => {
       (a: { id: string }) => a.id !== "fun-dive-0",
     );
     const migrated = migrateStore(legacy);
-    expect(migrated.schemaRevision).toBe(3);
+    expect(migrated.schemaRevision).toBe(4);
     expect(migrated.bookings[0]).toMatchObject({
       id,
       total: 850000,

@@ -47,7 +47,7 @@ test("manager calendar filtering and daily view are functional", async ({
   await expect(
     page.getByRole("heading", { name: "Open Water", exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "Daily", exact: true }).click();
+  await page.getByRole("button", { name: "Day", exact: true }).click();
   await page.getByLabel("Date", { exact: true }).fill("2000-01-01");
   await expect(
     page.getByRole("heading", { name: "A quiet day on the calendar." }),

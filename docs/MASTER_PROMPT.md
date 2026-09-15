@@ -1406,3 +1406,15 @@ After fixing and implementing this scope:
 11. Return the PR URL, verified Preview URL, test results, completed features, unresolved assumptions, and remaining Phase 3 backlog.
 
 Do not merge PR #1 into `main` without my explicit approval.
+
+---
+
+## Approved operational UX revision — 2026-09-15
+
+Continue from verified Phase 4 without rebuilding completed work. Preserve all verified booking, payment, portal, CRM, training, document, Fun Dive, Refresher, role-permission, staffing-rule and equipment-allocation behavior.
+
+Implement scalable category → size/model → individual equipment navigation with summaries, asset-code search, filters, pagination and Manager-only sequential bulk creation. Add a responsive Month Calendar beside Day, Week and List, with compact activity, participant, professional-coverage and status information. Support daily staffing for at least ten professionals, Permanent/Part-time/Freelance employment type, session coverage, clear activity-level team wording and secondary session overrides.
+
+Implement configurable boat manifests and seats. Count booking participants and assigned professionals as occupants. Front Desk and Manager edit; assigned Instructor/DM read only their activities; customers are denied. Validate range, duplicates, unavailable seats and occupancy; suggest consecutive seats without overwriting confirmed seats; audit changes. Boat crew remains an operator decision.
+
+Create `backup/phase4-verified` at exact commit `343869549deca2fc123b64b485c50e776b0064a0`. Keep implementation on `build/diveos-mvp`; do not deploy or merge the backup branch and do not merge PR #1.

@@ -8,6 +8,7 @@ import {
   bangkokDate,
 } from "./model";
 import { event, reserved } from "./commands";
+import { assignedIds } from "./policies";
 
 const now = () => new Date().toISOString();
 const clean = (value: string, max = 1000) => value.trim().slice(0, max);
@@ -172,16 +173,61 @@ export function saveBoat(source: Store, actor: Actor, input: Boat): Store {
     )
   )
     throw new Error("A boat with this name already exists.");
+  if (
+    existing &&
+    state.boatManifests.some(
+      (manifest) =>
+        manifest.boatId === existing.id &&
+        manifest.seats.some((seat) => seat.seat > input.capacity),
+    )
+  )
+    throw new Error("Existing manifest seats exceed the new boat capacity.");
+  if (
+    existing &&
+    state.boatManifests
+      .filter((manifest) => manifest.boatId === existing.id)
+      .some((manifest) => {
+        const activity = state.activities.find(
+          (row) => row.id === manifest.activityId,
+        );
+        if (!activity) return false;
+        const participants = manifest.bookingIds.reduce((total, bookingId) => {
+          const booking = state.bookings.find((row) => row.id === bookingId);
+          return total + (booking?.participants.length ?? 0);
+        }, 0);
+        return (
+          participants + assignedIds(state, activity).length > input.capacity
+        );
+      })
+  )
+    throw new Error(
+      "Existing manifest occupancy exceeds the new boat capacity.",
+    );
+  const capacityChanged = !!existing && existing.capacity !== input.capacity;
   const record: Boat = {
     ...input,
     id,
     name: clean(input.name, 100),
     notes: clean(input.notes || ""),
     active: input.active ?? true,
+    unavailableSeats: (
+      input.unavailableSeats ??
+      existing?.unavailableSeats ??
+      []
+    ).filter((seat) => seat <= input.capacity),
   };
   if (existing) Object.assign(existing, record);
   else state.boats.push(record);
-  event(state, actor, id, existing ? "Boat updated" : "Boat created");
+  event(
+    state,
+    actor,
+    id,
+    capacityChanged
+      ? `Boat passenger capacity changed to ${input.capacity}`
+      : existing
+        ? "Boat updated"
+        : "Boat created",
+  );
   return state;
 }
 

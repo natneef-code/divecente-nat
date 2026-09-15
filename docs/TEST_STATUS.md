@@ -56,3 +56,10 @@ Published verification on 2026-09-12: GitHub Actions `Verify DiveOS` run 3455424
 - Visual QA: desktop and mobile Manager Dashboard screenshots inspected. Navigation, actions, metric cards, empty states and deferred-work notice remain readable and contained at both widths.
 - One first full run exposed an obsolete Manager-home expectation after the dashboard became the role landing page; the established transfer-review metric and calendar link were restored. The final complete run passed. No application failure is reported as passing.
 - Published verification: GitHub Actions `Verify DiveOS` run 34817419820 passed for PR head `3438695`. The full 40-case desktop/mobile Playwright suite passed against `https://deploy-preview-1--divecente-nat.netlify.app` in 42.4 seconds. The live run includes all Phase 1–3 regression, Phase 4 management workflows, direct routes, permissions, responsiveness and automated accessibility checks. No unresolved test failures.
+
+## 2026-09-15 operational UX revision — local
+- Formatting and TypeScript/Vite production build passed.
+- Domain: 45/45 passed, covering large unique inventory, employment types/session staffing, Instructor requirements, configurable boats, seat validation, occupancy-safe capacity reduction, non-destructive suggestions, permissions and audit.
+- Browser: 52/52 passed in 54.3 seconds across desktop and mobile. New cases cover equipment drilldown/search/pagination/bulk creation, Month navigation, daily staffing, manifests, professional read-only access, customer denial, WCAG A/AA and horizontal overflow.
+- Visual QA: desktop/mobile Equipment, Month Calendar, Staffing and Boat Manifest captures inspected. Crowded mobile Month labels were corrected to a two-column labelled grid; the focused accessibility/overflow check then passed 2/2.
+- Live CI and preview verification remain pending publication.

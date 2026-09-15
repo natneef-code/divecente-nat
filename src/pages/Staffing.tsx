@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useStore } from "../data/store";
 import {
   type Activity,
@@ -161,7 +162,9 @@ function TeamForm({
     >
       <fieldset>
         <legend>
-          {session ? `Session team · ${session.date}` : "Activity default team"}
+          {session
+            ? `Team for this session · ${session.date}`
+            : "Assigned Dive Team"}
         </legend>
         {state.staffMembers
           .filter((p) => ["instructor", "divemaster"].includes(p.role))
@@ -180,6 +183,7 @@ function TeamForm({
                 }}
               />
               {p.name} · {p.role === "instructor" ? "Instructor" : "Divemaster"}
+              {` · ${p.employmentType}`}
               {!p.active ? " · inactive" : ""}
             </label>
           ))}
@@ -199,7 +203,7 @@ function TeamForm({
         </Field>
         {feedback}
         <button className="form-spacer">
-          {session ? "Save session team" : "Save activity team"}
+          {session ? "Save session-only team" : "Assign staff for all sessions"}
         </button>
       </fieldset>
     </form>
@@ -207,13 +211,22 @@ function TeamForm({
 }
 export function Staffing() {
   const { state, actor } = useStore();
-  const [key, setKey] = useState("");
+  const [params] = useSearchParams();
+  const [key, setKey] = useState(params.get("activity") || "");
+  const [day, setDay] = useState(
+    state.activities.find((item) => item.id === params.get("activity"))?.date ||
+      state.activities[0]?.date ||
+      "",
+  );
   const [note, setNote] = useState("");
   const { run, feedback } = useAction();
   const activities = state.activities.filter(
     (a) => actor && (staff(actor) || hasAssignment(state, actor, a.id)),
   );
   const activity = activities.find((a) => a.id === key) || activities[0];
+  const dayActivities = activities.filter(
+    (item) => item.date <= day && item.endDate >= day,
+  );
   if (!activity)
     return (
       <main className="container section">
@@ -227,10 +240,127 @@ export function Staffing() {
   return (
     <main className="container section">
       <PageTitle
-        eyebrow="STAFFING & READINESS"
-        title="The right team for every dive."
-        description="Participant capacity and professional coverage are separate. Stricter rules apply; in-water training always needs an Instructor. Assignment is manual."
+        eyebrow="DAILY STAFFING & READINESS"
+        title="Cover every session, one time period at a time."
+        description="Front Desk and Manager confirm assignments manually. Professionals may cover separate activities on the same day when times do not overlap and qualifications remain valid."
       />
+      {staff(actor) && (
+        <section className="panel staffing-day">
+          <div className="panel-heading">
+            <h2>Daily staffing overview</h2>
+            <Field
+              label="Staffing date"
+              type="date"
+              value={day}
+              onChange={setDay}
+            />
+          </div>
+          <div className="daily-staff-list">
+            {dayActivities.map((item) => {
+              const product = state.courses.find(
+                (course) => course.id === item.courseId,
+              )!;
+              const sessions = sessionsFor(state, item).filter(
+                (session) => session.date === day,
+              );
+              return (
+                <article key={item.id}>
+                  <div>
+                    <span className="eyebrow">
+                      {product.kind === "fun-dive" ? "FUN DIVE" : "COURSE"} ·{" "}
+                      {item.time}
+                    </span>
+                    <h3>{product.name}</h3>
+                    <p>
+                      {state.bookings
+                        .filter(
+                          (booking) =>
+                            booking.activityId === item.id &&
+                            !["Cancelled", "Refunded", "No-show"].includes(
+                              booking.status,
+                            ),
+                        )
+                        .reduce(
+                          (total, booking) =>
+                            total + booking.participants.length,
+                          0,
+                        )}{" "}
+                      participants · {item.site}
+                    </p>
+                  </div>
+                  <div className="staff-session-list">
+                    {sessions.map((session) => {
+                      const coverage = staffingSummary(state, item, session);
+                      const ratio = effectiveRules(state, item, session).ratio;
+                      const participantCount = state.bookings
+                        .filter(
+                          (booking) =>
+                            booking.activityId === item.id &&
+                            !["Cancelled", "Refunded", "No-show"].includes(
+                              booking.status,
+                            ),
+                        )
+                        .reduce(
+                          (total, booking) =>
+                            total + booking.participants.length,
+                          0,
+                        );
+                      return (
+                        <div key={session.id}>
+                          <strong>
+                            {session.time}–{session.endTime}
+                          </strong>
+                          <Badge>
+                            {coverage.ready
+                              ? "Ready"
+                              : coverage.assigned
+                                ? "Warning"
+                                : "Blocked"}
+                          </Badge>
+                          <span>
+                            {participantCount}/{ratio} · {coverage.assigned}{" "}
+                            assigned ·{" "}
+                            {coverage.missing
+                              ? `${coverage.missing} professional missing`
+                              : "covered"}
+                          </span>
+                          <small>
+                            {assignedIds(state, item, session)
+                              .map((id) => {
+                                const member = state.staffMembers.find(
+                                  (person) => person.id === id,
+                                );
+                                return `${member?.name || id} · ${member?.employmentType || "Permanent"}`;
+                              })
+                              .join(", ") ||
+                              "Available qualified staff must be assigned"}
+                          </small>
+                          {coverage.issues.map((issue) => (
+                            <small className="error" key={issue}>
+                              {issue}
+                            </small>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button
+                    className="small secondary"
+                    onClick={() => setKey(item.id)}
+                  >
+                    Open activity
+                  </button>
+                </article>
+              );
+            })}
+            {!dayActivities.length && (
+              <Empty title="No activities on this day">
+                Choose another date.
+              </Empty>
+            )}
+          </div>
+        </section>
+      )}
       <Field label="Activity to staff" value={activity.id} onChange={setKey}>
         {activities.map((a) => (
           <option key={a.id} value={a.id}>
@@ -329,7 +459,7 @@ export function Staffing() {
                 ))}
                 {staff(actor) && (
                   <details>
-                    <summary>Override session team</summary>
+                    <summary>Change team for this session only</summary>
                     <TeamForm
                       key={`${session.id}-${activity.professionalIds?.join()}`}
                       activity={activity}

@@ -311,12 +311,19 @@ export function Staff() {
 }
 export function Calendar() {
   const { state, actor } = useStore();
-  const [view, setView] = useState<"list" | "daily" | "weekly">("list");
+  const [view, setView] = useState<"list" | "daily" | "weekly" | "month">(
+    "list",
+  );
   const [date, setDate] = useState(state.activities[0]?.date || bangkokDate());
   const [course, setCourse] = useState("all");
   const end = new Date(`${date}T12:00:00Z`);
   end.setUTCDate(end.getUTCDate() + 6);
   const endDate = end.toISOString().slice(0, 10);
+  const monthStart = `${date.slice(0, 7)}-01`;
+  const monthEndDate = new Date(`${monthStart}T12:00:00Z`);
+  monthEndDate.setUTCMonth(monthEndDate.getUTCMonth() + 1);
+  monthEndDate.setUTCDate(0);
+  const monthEnd = monthEndDate.toISOString().slice(0, 10);
   const activities = state.activities
     .filter(
       (a) =>
@@ -327,7 +334,9 @@ export function Calendar() {
         (view === "list" ||
           (view === "daily"
             ? a.date <= date && a.endDate >= date
-            : a.date <= endDate && a.endDate >= date)),
+            : view === "weekly"
+              ? a.date <= endDate && a.endDate >= date
+              : a.date <= monthEnd && a.endDate >= monthStart)),
     )
     .sort((a, b) => a.date.localeCompare(b.date));
   return (
@@ -337,9 +346,9 @@ export function Calendar() {
         title="The plan, all in one place."
         description="Course blocks include every day from start to finish. Student counts update from the same booking records."
       />
-      <div className="filter-bar">
+      <div className="filter-bar calendar-filters">
         <div className="segmented" aria-label="Calendar view">
-          {(["daily", "weekly", "list"] as const).map((v) => (
+          {(["daily", "weekly", "month", "list"] as const).map((v) => (
             <button
               key={v}
               className={view === v ? "active" : ""}
@@ -347,16 +356,22 @@ export function Calendar() {
               aria-pressed={view === v}
             >
               {v === "daily"
-                ? "Daily"
+                ? "Day"
                 : v === "weekly"
-                  ? "7 days"
-                  : "All dates"}
+                  ? "Week"
+                  : v === "month"
+                    ? "Month"
+                    : "List"}
             </button>
           ))}
         </div>
         {view !== "list" && (
           <label className="inline-label">
-            {view === "weekly" ? "From date" : "Date"}
+            {view === "weekly"
+              ? "From date"
+              : view === "month"
+                ? "Month containing"
+                : "Date"}
             <input
               type="date"
               value={date}
@@ -379,7 +394,17 @@ export function Calendar() {
           </select>
         </label>
       </div>
-      {activities.length === 0 ? (
+      {view === "month" ? (
+        <MonthCalendar
+          state={state}
+          activities={activities}
+          monthStart={monthStart}
+          onDay={(day) => {
+            setDate(day);
+            setView("daily");
+          }}
+        />
+      ) : activities.length === 0 ? (
         <Empty title="A quiet day on the calendar.">
           No activities match this view. Try another date or course.
         </Empty>
@@ -479,5 +504,81 @@ export function Calendar() {
         equipment conflicts in Staffing. Assignment is always manual.
       </p>
     </main>
+  );
+}
+
+function MonthCalendar({
+  state,
+  activities,
+  monthStart,
+  onDay,
+}: {
+  state: Store;
+  activities: Store["activities"];
+  monthStart: string;
+  onDay: (day: string) => void;
+}) {
+  const first = new Date(`${monthStart}T12:00:00Z`);
+  const offset = (first.getUTCDay() + 6) % 7;
+  first.setUTCDate(first.getUTCDate() - offset);
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const value = new Date(first);
+    value.setUTCDate(value.getUTCDate() + index);
+    return value.toISOString().slice(0, 10);
+  });
+  return (
+    <section
+      className="month-calendar"
+      aria-label={`Month calendar ${monthStart.slice(0, 7)}`}
+    >
+      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((label) => (
+        <strong className="month-weekday" key={label}>
+          {label}
+        </strong>
+      ))}
+      {days.map((day) => {
+        const dayActivities = activities.filter(
+          (activity) => activity.date <= day && activity.endDate >= day,
+        );
+        return (
+          <div
+            className={`month-day ${day.slice(0, 7) !== monthStart.slice(0, 7) ? "outside" : ""}`}
+            key={day}
+          >
+            <button
+              className="month-date"
+              onClick={() => onDay(day)}
+              aria-label={`Open ${dateLabel(day)}`}
+            >
+              {Number(day.slice(-2))}
+            </button>
+            {dayActivities.map((activity) => {
+              const product = state.courses.find(
+                (course) => course.id === activity.courseId,
+              )!;
+              const ready = operationalReadiness(state, activity);
+              const status = ready.ready
+                ? "Ready"
+                : ready.assigned
+                  ? "Warning"
+                  : "Blocked";
+              return (
+                <Link
+                  className={`month-activity ${status.toLowerCase()}`}
+                  to={`/app/staffing?activity=${activity.id}`}
+                  key={activity.id}
+                >
+                  <strong>{product.name}</strong>
+                  <small>
+                    {reserved(state, activity.id)} people · {ready.assigned}/
+                    {ready.required} pros · {status}
+                  </small>
+                </Link>
+              );
+            })}
+          </div>
+        );
+      })}
+    </section>
   );
 }

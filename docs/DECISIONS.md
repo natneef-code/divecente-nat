@@ -35,3 +35,12 @@
 - Site, boat and general-setting changes are Manager-only and audit logged. Currency and time zone stay fixed at THB and Asia/Bangkok for this tenant.
 - Audit history remains an append-only application convention in device-local demo state; it is not tamper-resistant without a server database.
 - Equipment and maintenance UI, calendar including Month View, staffing assignment, Activity default team, staffing readiness/workload indicators, and dependent dashboard widgets are classified exactly as `Pending user-approved UX revision` and were not redesigned.
+
+## 2026-09-15 — Approved operational UX revision
+- GitHub backup branch `backup/phase4-verified` points to exact commit `343869549deca2fc123b64b485c50e776b0064a0`; it has no PR or deployment.
+- Inventory uses progressive disclosure because large fleets are operated by category and fit before an individual asset is needed. Bulk creation is limited to 100 per action and retains one stable record per item.
+- Month view becomes an activity-day list on mobile rather than compressing seven columns. Empty dates are hidden; desktop retains a conventional grid.
+- Activity-level team is labelled `Assigned Dive Team`; session controls are explicitly `session only`. Seed data contains 12 fictional professionals spanning all three employment types.
+- Boat capacity includes customers and assigned dive professionals. Boat crew is excluded until the operator defines crew roles and whether crew consume seats.
+- Manifest writes remain Front Desk/Manager only. Instructor/DM visibility is limited to assigned activities, preserving least privilege and excluding financial/medical details.
+- Schema revision 4 is additive and preserves bookings, money, documents, training, allocations and audit history.

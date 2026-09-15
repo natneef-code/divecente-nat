@@ -129,7 +129,7 @@ export type Store = {
   bookings: Booking[];
   payments: Payment[];
   events: AuditEvent[];
-  schemaRevision: 3;
+  schemaRevision: 4;
   sessions: Session[];
   boats: Boat[];
   diveSites: DiveSite[];
@@ -142,6 +142,7 @@ export type Store = {
   maintenance: MaintenanceRecord[];
   notifications: NotificationEvent[];
   refunds: Refund[];
+  boatManifests: BoatManifest[];
   settings: Settings;
 };
 export const roles: {
@@ -229,6 +230,7 @@ export type StaffMember = {
   email: string;
   phone: string;
   active: boolean;
+  employmentType: "Permanent" | "Part-time" | "Freelance";
   qualifiedCourseIds: string[];
   qualificationExpiry: string;
   availableFrom: string;
@@ -370,6 +372,21 @@ export type Boat = {
   capacity: number;
   active?: boolean;
   notes?: string;
+  unavailableSeats?: number[];
+};
+export type BoatSeat = {
+  occupantId: string;
+  occupantType: "participant" | "professional";
+  seat: number;
+};
+export type BoatManifest = {
+  id: string;
+  activityId: string;
+  boatId: string;
+  bookingIds: string[];
+  seats: BoatSeat[];
+  createdAt: string;
+  updatedAt: string;
 };
 export type DiveSite = {
   id: string;

@@ -1,6 +1,7 @@
 import { CRM, Enquiries, CustomerProfile, ManualBooking } from "./pages/CRM";
 import { Training, CustomerTraining } from "./pages/Training";
 import { Equipment } from "./pages/Equipment";
+import { BoatManifestPage } from "./pages/BoatManifest";
 import { Staffing } from "./pages/Staffing";
 import { Configuration, Reports } from "./pages/Configuration";
 import {
@@ -104,6 +105,7 @@ export default function App() {
                 <Route path="/app/new-booking" element={<ManualBooking />} />
                 <Route path="/app/training" element={<Training />} />
                 <Route path="/app/equipment" element={<Equipment />} />
+                <Route path="/app/boats" element={<BoatManifestPage />} />
                 <Route path="/app/staffing" element={<Staffing />} />
                 <Route path="/app/settings" element={<Configuration />} />
                 <Route path="/app/reports" element={<Reports />} />

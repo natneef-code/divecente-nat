@@ -32,4 +32,7 @@ Browser persistence is neither a secure authorization boundary nor a multi-user 
 
 `src/pages/Phase4.tsx` composes state-derived dashboard/report views and Manager administration routes. Reports calculate integer-satang totals from bookings and approved payments. The Notification Center records preview content, channels and read state but has no provider transport. Every Phase 4 mutation appends an audit event through the same persisted command transaction.
 
-The Phase 4 boundary intentionally excludes feedback-dependent operational UX. Equipment/maintenance screens, calendar views, staffing assignment, Activity default team, readiness/workload indicators and dependent dashboard widgets retain their Phase 3 implementation until the user approves a revision.
+## Operational UX layer
+`src/domain/operationsUx.ts` derives equipment summaries and session coverage and owns immutable bulk-inventory and boat-manifest commands. Store schema revision 4 adds staff employment type, unavailable boat seats and manifests through an additive migration. A manifest references one activity and boat, contains booking-group IDs and occupant-to-seat records, and derives assigned professionals from the existing staffing policy. Capacity guards count both participants and professionals.
+
+Equipment remains normalized as individual assets while the UI progressively reveals category, size/model and asset rows. Month Calendar state derives from existing activities, bookings and staffing rules. Staffing keeps activity-level manual teams as the primary plan and existing session overrides for exceptions. This layer does not change financial snapshots, customer fitting boundaries, qualification rules or training authority.

@@ -57,16 +57,30 @@ export function operationsSeed(now = new Date()) {
     ["instructor-ben", "Ben", "instructor"],
     ["instructor-lin", "Lin", "instructor"],
     ["divemaster-dao", "Dao", "divemaster"],
+    ["instructor-pim", "Pim", "instructor"],
+    ["instructor-noi", "Noi", "instructor"],
+    ["instructor-kai", "Kai", "instructor"],
+    ["divemaster-arin", "Arin", "divemaster"],
+    ["divemaster-beam", "Beam", "divemaster"],
+    ["divemaster-chai", "Chai", "divemaster"],
+    ["divemaster-fah", "Fah", "divemaster"],
+    ["divemaster-niran", "Niran", "divemaster"],
   ] as const;
   return {
-    schemaRevision: 3 as const,
-    staffMembers: people.map(([id, name, role]) => ({
+    schemaRevision: 4 as const,
+    staffMembers: people.map(([id, name, role], index) => ({
       id,
       name,
       role,
       email: `${name.toLowerCase()}@example.test`,
       phone: "Demo only",
       active: true,
+      employmentType:
+        index < 4
+          ? ("Permanent" as const)
+          : index < 8
+            ? ("Part-time" as const)
+            : ("Freelance" as const),
       qualifiedCourseIds: ["open-water", "advanced", "nitrox", "fun-dive"],
       qualificationExpiry: future,
       availableFrom: today,
@@ -81,6 +95,7 @@ export function operationsSeed(now = new Date()) {
     maintenance: [],
     notifications: [],
     refunds: [],
+    boatManifests: [],
     sessions: [] as Session[],
     boats: [
       {
@@ -89,6 +104,7 @@ export function operationsSeed(now = new Date()) {
         capacity: 12,
         active: true,
         notes: "Fictional training boat",
+        unavailableSeats: [],
       },
       {
         id: "boat-willow",
@@ -96,6 +112,7 @@ export function operationsSeed(now = new Date()) {
         capacity: 12,
         active: true,
         notes: "Fictional day boat",
+        unavailableSeats: [],
       },
       {
         id: "boat-shore",
@@ -103,6 +120,7 @@ export function operationsSeed(now = new Date()) {
         capacity: 100,
         active: true,
         notes: "No vessel required",
+        unavailableSeats: [],
       },
       {
         id: "boat-coral",
@@ -110,6 +128,7 @@ export function operationsSeed(now = new Date()) {
         capacity: 12,
         active: true,
         notes: "Fictional Fun Dive boat",
+        unavailableSeats: [],
       },
     ],
     diveSites: [
@@ -260,12 +279,12 @@ export function syncBookingRecords(s: Store, b: Booking) {
 export function migrateStore(raw: Store): Store {
   raw = structuredClone(raw);
   const defaults = operationsSeed();
-  const legacy = raw.schemaRevision !== 3;
+  const legacy = raw.schemaRevision !== 4;
   const s: Store = {
     ...defaults,
     ...raw,
     settings: { ...defaults.settings, ...raw.settings },
-    schemaRevision: 3,
+    schemaRevision: 4,
   };
   s.courses = s.courses.map((c) => ({
     ...c,
@@ -274,6 +293,16 @@ export function migrateStore(raw: Store): Store {
     includedEquipment:
       c.includedEquipment ?? (c.id === "nitrox" ? [] : [...STANDARD_EQUIPMENT]),
     staffing: c.staffing ?? {},
+  }));
+  s.staffMembers = s.staffMembers.map((member, index) => ({
+    ...member,
+    employmentType:
+      member.employmentType ??
+      (index < 2 ? "Permanent" : index === 2 ? "Part-time" : "Freelance"),
+  }));
+  s.boats = s.boats.map((boat) => ({
+    ...boat,
+    unavailableSeats: boat.unavailableSeats ?? [],
   }));
   if (!s.courses.some((c) => c.id === "fun-dive")) {
     s.courses.push(structuredClone(funDiveCourse));
@@ -299,10 +328,9 @@ export function migrateStore(raw: Store): Store {
       readinessStatus: "Draft",
     });
   }
-  if (!s.staffMembers.some((p) => p.id === "divemaster-dao"))
-    s.staffMembers.push(
-      defaults.staffMembers.find((p) => p.id === "divemaster-dao")!,
-    );
+  for (const member of defaults.staffMembers)
+    if (!s.staffMembers.some((person) => person.id === member.id))
+      s.staffMembers.push(member);
   if (legacy)
     for (const p of s.staffMembers)
       if (
@@ -325,5 +353,30 @@ export function migrateStore(raw: Store): Store {
     }
   }
   for (const b of s.bookings) syncBookingRecords(s, b);
+  for (const activity of s.activities) {
+    const boatId = activity.boatId;
+    if (
+      !boatId ||
+      s.boatManifests.some(
+        (row) => row.activityId === activity.id && row.boatId === boatId,
+      )
+    )
+      continue;
+    s.boatManifests.push({
+      id: `manifest-${activity.id}-${boatId}`,
+      activityId: activity.id,
+      boatId,
+      bookingIds: s.bookings
+        .filter(
+          (booking) =>
+            booking.activityId === activity.id &&
+            !["Cancelled", "Refunded", "No-show"].includes(booking.status),
+        )
+        .map((booking) => booking.id),
+      seats: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
   return s;
 }

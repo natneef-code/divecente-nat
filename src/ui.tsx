@@ -173,6 +173,7 @@ export function WorkspaceNav() {
               <NavLink to="/app/calendar">Operations calendar</NavLink>
               <NavLink to="/app/staffing">Staffing</NavLink>
               <NavLink to="/app/equipment">Equipment</NavLink>
+              <NavLink to="/app/boats">Boat manifests</NavLink>
               {(actor?.role === "instructor" || actor?.role === "manager") && (
                 <NavLink to="/app/training">Training</NavLink>
               )}

@@ -97,7 +97,7 @@ test("professional fitting → audited Front Desk correction → Divemaster chec
   await page.goto("/app/staffing");
   await page.getByLabel("Dao · Divemaster", { exact: false }).first().check();
   await page
-    .getByRole("button", { name: "Save activity team", exact: true })
+    .getByRole("button", { name: "Assign staff for all sessions", exact: true })
     .click();
   await expect(page.getByText("Manual team assignment saved.")).toBeVisible();
   await login(page, "Divemaster");
@@ -105,6 +105,9 @@ test("professional fitting → audited Front Desk correction → Divemaster chec
   await page
     .getByLabel("Equipment category", { exact: true })
     .selectOption("Mask");
+  await page
+    .getByLabel("Equipment size or model", { exact: true })
+    .selectOption("Universal");
   await page
     .getByRole("button", { name: /Manage EQ/ })
     .first()
@@ -120,6 +123,12 @@ test("professional fitting → audited Front Desk correction → Divemaster chec
   ).toBeVisible();
   await login(page, "Front Desk");
   await page.goto("/app/equipment");
+  await page
+    .getByLabel("Equipment category", { exact: true })
+    .selectOption("Mask");
+  await page
+    .getByLabel("Equipment size or model", { exact: true })
+    .selectOption("Universal");
   await page
     .getByRole("button", { name: /Manage EQ/ })
     .first()
@@ -138,6 +147,12 @@ test("professional fitting → audited Front Desk correction → Divemaster chec
   ).toBeVisible();
   await login(page, "Divemaster");
   await page.goto("/app/equipment");
+  await page
+    .getByLabel("Equipment category", { exact: true })
+    .selectOption("Mask");
+  await page
+    .getByLabel("Equipment size or model", { exact: true })
+    .selectOption("Universal");
   await page
     .getByRole("button", { name: /Manage EQ/ })
     .nth(1)
@@ -176,7 +191,7 @@ test("manager raises independent capacities and Front Desk staffs a six-student 
   await page.goto("/app/staffing");
   await page.getByLabel("Dao · Divemaster", { exact: false }).first().check();
   await page
-    .getByRole("button", { name: "Save activity team", exact: true })
+    .getByRole("button", { name: "Assign staff for all sessions", exact: true })
     .click();
   await login(page, "Customer");
   await page.goto("/courses/open-water");

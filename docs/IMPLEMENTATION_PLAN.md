@@ -32,12 +32,14 @@
 - [x] Searchable audit history.
 - [x] Manager-only route and command enforcement, desktop/mobile accessibility and regression coverage.
 
-## Pending user-approved UX revision
-- [ ] Equipment workspace and maintenance UI.
-- [ ] Operations Calendar, including Month View.
-- [ ] Staffing assignment workflow and Activity default team.
-- [ ] Staffing readiness and workload indicators.
-- [ ] Dashboard widgets dependent on unfinished staffing or equipment UX decisions.
+## Approved operational UX revision
+- [x] Scalable category → size/model → individual equipment workspace, summaries, filters, pagination and sequential bulk creation.
+- [x] Month Calendar with activity/participant/professional/status summaries and responsive date navigation.
+- [x] Daily staffing for 10+ staff, employment type, per-session coverage, clear activity-team language and secondary session overrides.
+- [x] Boat manifests, groups, professional occupancy, configurable seats, suggestions, conflicts, audit and role permissions.
+- [x] Additive schema revision 4 and regression-safe migration.
+- [x] Domain, build, desktop/mobile workflow, accessibility, overflow and visual QA locally.
+- [ ] Publish checkpoint, verify CI and run the complete suite against the Netlify Deploy Preview.
 
 ## Remaining operational backlog
 - [ ] Availability publishing UI beyond current product publication and seeded schedules.

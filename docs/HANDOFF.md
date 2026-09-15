@@ -1,17 +1,17 @@
-# Handoff — Phase 4 management checkpoint
+# Handoff — approved operational UX checkpoint
 
 1. **Current branch:** `build/diveos-mvp` in `/Users/kittipa/Documents/Codex/divecente-nat`.
-2. **Latest relevant commit:** published PR head is `3438695` (`feat: add Phase 4 management experience`); local equivalent is `0e56469`. Run `git log -5` and inspect PR #1 for newer commits.
-3. **Current working state:** Phase 1–3 remains intact. Feedback-independent Phase 4 is published and fully verified locally and on the Deploy Preview.
-4. **Completed work:** Manager Dashboard; filterable MVP Reports; simulated Notification Center; product/course create/edit/duplicate/publish; dive site and boat management; general settings; searchable Audit History; Manager-only command and route enforcement; durable browser-demo state and audit events.
-5. **In-progress work:** no implementation is in progress. Await user review or an approved backlog item.
-6. **Exact next task:** use the preview review guide with PR #1. If implementation resumes, continue only from the first approved incomplete item in `IMPLEMENTATION_PLAN.md`. Do not merge.
-7. **Remaining backlog:** availability administration beyond product publication/seeded schedules; document-specific uploads/signing; full accounting/reconciliation; production backend/auth/providers; Phase 5 quality and handover. See `IMPLEMENTATION_PLAN.md`.
-8. **Known bugs:** none in the verified local scope. Device-local state has no multi-user concurrency, production authorization, tamper-resistant audit, or recovery guarantee.
-9. **Test results:** formatting passed; 39 domain tests passed; TypeScript/Vite build passed; 40 desktop/mobile browser cases passed locally in 35.9s and again against the Deploy Preview in 42.4s. Dashboard desktop/mobile screenshots inspected. GitHub Actions run 34817419820 passed.
+2. **Latest relevant commit:** local pre-checkpoint HEAD `d1f1cb5`; remote PR pre-checkpoint head `a8ff825`; verified Phase 4 implementation `3438695`. Replace after publication.
+3. **Current working state:** Phase 1–4 behavior is preserved. Approved Equipment, Month Calendar, daily Staffing and Boat Manifest revisions are complete and verified locally. Backup branch `backup/phase4-verified` exists at exact SHA `343869549deca2fc123b64b485c50e776b0064a0` and must not be deployed or merged.
+4. **Completed work:** scalable category/size-model/asset equipment inventory; summaries/search/status filters/pagination/bulk codes; Day/Week/Month/List Calendar; per-session staffing with 12 professionals and employment types; clear activity and session-only assignments; boat groups, participant/professional occupancy, seats, unavailable seats, suggestions, validation, permissions and audit; additive schema revision 4.
+5. **In-progress work:** publish this safe checkpoint to PR #1, verify GitHub Actions and Netlify, then record deployed evidence.
+6. **Exact next task:** commit and publish, wait for CI/Netlify, run all 52 browser cases against the preview, update continuity files with exact results, then publish the verification docs.
+7. **Remaining backlog:** boat crew model/seat policy; availability administration; staff profile/qualification editor; rich session planning; secure documents; accounting/reconciliation; production backend/auth/providers; full manual accessibility/legal/privacy/recovery review.
+8. **Known bugs:** none locally. Browser demo lacks concurrency, production authorization, tamper-resistant audit and recovery guarantees. Crew is intentionally unresolved.
+9. **Test results:** formatting passed; 45/45 domain tests passed; production build passed; 52/52 desktop/mobile browser cases passed in 54.3s. Focused visual/accessibility/overflow rerun passed 2/2 after correcting mobile Month filters. Eight screenshots inspected.
 10. **Build and preview commands:** `npm ci`; `npm run dev`; `npm run format:check`; `npm test`; `npm run build`; `npm run test:e2e`. Live: `PLAYWRIGHT_BASE_URL=https://deploy-preview-1--divecente-nat.netlify.app npm run test:e2e`.
 11. **Environment variables:** none required for the demo. Optional `PLAYWRIGHT_BASE_URL`. Future server placeholders only: `DATABASE_URL`, `AUTH_SECRET`, `PAYMENT_WEBHOOK_SECRET`; never record values.
-12. **External blockers or decisions:** no blocker for the approved Phase 4 scope. Equipment workspace/maintenance UI, Operations Calendar including Month View, staffing assignment, Activity default team, staffing readiness/workload indicators, and dependent dashboard widgets are `Pending user-approved UX revision`. Production credentials, legal/privacy review and operating decisions remain future gates. Local HTTPS push lacks credentials; use the connected GitHub tools for publication.
+12. **External blockers or decisions:** no publication blocker. Boat crew roles and crew-seat policy need operator input before production. Production credentials and legal/privacy review remain future gates. Local HTTPS push lacks credentials; use connected GitHub tools if needed.
 
 Branch: https://github.com/natneef-code/divecente-nat/tree/build/diveos-mvp
 

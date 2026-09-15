@@ -5,7 +5,7 @@ import {
 } from "../domain/policies";
 import { useState } from "react";
 import { useStore } from "../data/store";
-import { type EquipmentItem, bangkokDate, dateLabel } from "../domain/model";
+import { type EquipmentItem, dateLabel } from "../domain/model";
 import { staff } from "../domain/commands";
 import {
   allocateEquipment,
@@ -15,6 +15,11 @@ import {
   saveEquipment,
 } from "../domain/operations";
 import { equipmentCategories } from "../domain/records";
+import {
+  bulkCreateEquipment,
+  equipmentSummary,
+  itemOperationalStatus,
+} from "../domain/operationsUx";
 import { Badge, PageTitle } from "../ui";
 import { Field, useAction, Denied } from "./operation-ui";
 function AssetPanel({ item }: { item: EquipmentItem }) {
@@ -298,72 +303,231 @@ function AssetPanel({ item }: { item: EquipmentItem }) {
 }
 export function Equipment() {
   const { state, actor } = useStore();
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState("");
   const [query, setQuery] = useState("");
-  const [size, setSize] = useState("all");
-  const [selected, setSelected] = useState(state.equipmentItems[0]?.id || "");
+  const [size, setSize] = useState("");
+  const [status, setStatus] = useState("");
+  const [selected, setSelected] = useState("");
+  const [page, setPage] = useState(1);
+  const [bulk, setBulk] = useState({
+    category: "Fins",
+    size: "M",
+    brand: "Demo",
+    model: "Training series",
+    prefix: "FIN-M",
+    start: 1,
+    count: 10,
+  });
   const { run, feedback } = useAction();
   if (!actor || (!staff(actor) && !isProfessional(actor))) return <Denied />;
   const item = state.equipmentItems.find((i) => i.id === selected);
-  const rows = state.equipmentItems.filter(
-    (i) =>
-      (category === "all" || i.category === category) &&
-      (size === "all" || i.size === size) &&
-      `${i.id} ${i.category} ${i.size}`
-        .toLowerCase()
-        .includes(query.toLowerCase()),
-  );
+  const showAssets = !!size || !!query || !!status;
+  const rows = showAssets
+    ? state.equipmentItems.filter(
+        (i) =>
+          (!category || i.category === category) &&
+          (!size || i.size === size) &&
+          (!status || itemOperationalStatus(state, i) === status) &&
+          `${i.id} ${i.category} ${i.size}`
+            .toLowerCase()
+            .includes(query.toLowerCase()),
+      )
+    : [];
+  const pageSize = 20;
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const visible = rows.slice((page - 1) * pageSize, page * pageSize);
+  const categories = [...new Set(state.equipmentItems.map((i) => i.category))];
+  const sizes = [
+    ...new Set(
+      state.equipmentItems
+        .filter((i) => !category || i.category === category)
+        .map((i) => i.size),
+    ),
+  ];
   return (
     <main className="container section">
       <PageTitle
         eyebrow="RENTAL EQUIPMENT"
         title="Every item, accounted for."
-        description="Reserve individual assets, check them out, track returns and report damage. Overlapping allocations and overdue maintenance are blocked."
+        description="Start with a category, then a size or model group, and open an individual physical asset only when needed. Every asset remains uniquely tracked."
       />
       {feedback}
+      {!category && !query ? (
+        <div className="equipment-category-grid">
+          {categories.map((name) => {
+            const summary = equipmentSummary(state, name);
+            return (
+              <button
+                className="equipment-summary"
+                key={name}
+                onClick={() => {
+                  setCategory(name);
+                  setSize("");
+                  setPage(1);
+                }}
+              >
+                <strong>{name}</strong>
+                <span>
+                  {summary.total} total · {summary.available} available
+                </span>
+                <small>
+                  {summary.reserved} reserved · {summary.checkedOut} checked out
+                  · {summary.maintenance} maintenance · {summary.damaged}{" "}
+                  damaged · {summary.outOfService} out of service
+                </small>
+              </button>
+            );
+          })}
+        </div>
+      ) : category && !size && !query ? (
+        <section className="panel">
+          <div className="panel-heading">
+            <h2>{category} groups</h2>
+            <button className="secondary small" onClick={() => setCategory("")}>
+              All categories
+            </button>
+          </div>
+          <div className="equipment-category-grid">
+            {sizes.map((name) => {
+              const summary = equipmentSummary(state, category, name);
+              return (
+                <button
+                  className="equipment-summary"
+                  key={name}
+                  onClick={() => {
+                    setSize(name);
+                    setPage(1);
+                  }}
+                >
+                  <strong>{name}</strong>
+                  <span>{summary.total} physical assets</span>
+                  <small>
+                    {summary.available} available · {summary.reserved} reserved
+                    · {summary.checkedOut} checked out
+                  </small>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
       <div className="filter-bar">
         <Field
           label="Equipment category"
           value={category}
           onChange={setCategory}
         >
-          <option value="all">All categories</option>
-          {Object.keys(equipmentCategories).map((c) => (
+          <option value="">All categories</option>
+          {categories.map((c) => (
             <option key={c}>{c}</option>
           ))}
         </Field>
-        <Field label="Equipment size" value={size} onChange={setSize}>
-          <option value="all">All sizes</option>
-          {[...new Set(state.equipmentItems.map((i) => i.size))].map((x) => (
+        <Field
+          label="Equipment size or model"
+          value={size}
+          onChange={(value) => {
+            setSize(value);
+            setPage(1);
+          }}
+        >
+          <option value="">All sizes/models</option>
+          {sizes.map((x) => (
             <option key={x}>{x}</option>
           ))}
         </Field>
-        <Field label="Search inventory" value={query} onChange={setQuery} />
-        {actor?.role === "manager" && (
-          <button
-            className="secondary"
-            onClick={() => {
-              const sample = rows[0] || state.equipmentItems[0];
-              const next = run(
-                (s, a) =>
-                  saveEquipment(s, a, {
-                    ...sample,
-                    id: "",
-                    serial: "FICTIONAL-NEW",
-                    status: "Available",
-                    lastInspection: bangkokDate(),
-                    nextMaintenance: state.staffMembers[0].availableTo,
-                    damageNotes: "",
-                  }),
-                "New demo inventory item added.",
+        <Field
+          label="Equipment status"
+          value={status}
+          onChange={(value) => {
+            setStatus(value);
+            setPage(1);
+          }}
+        >
+          <option value="">All statuses</option>
+          {[
+            "Available",
+            "Reserved",
+            "Checked out",
+            "Maintenance",
+            "Damaged",
+            "Lost",
+            "Retired",
+          ].map((value) => (
+            <option key={value}>{value}</option>
+          ))}
+        </Field>
+        <Field
+          label="Search by asset code"
+          value={query}
+          onChange={(value) => {
+            setQuery(value);
+            setPage(1);
+          }}
+        />
+      </div>
+      {actor.role === "manager" && (
+        <details className="panel">
+          <summary>Bulk-create similar physical assets</summary>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              run(
+                (store, currentActor) =>
+                  bulkCreateEquipment(store, currentActor, bulk),
+                `${bulk.count} individually tracked assets created.`,
               );
-              if (next) setSelected(next.equipmentItems.at(-1)!.id);
             }}
           >
-            Add demo asset
-          </button>
-        )}
-      </div>
+            <div className="form-grid">
+              <Field
+                label="Category"
+                value={bulk.category}
+                onChange={(value) => setBulk({ ...bulk, category: value })}
+              >
+                {Object.keys(equipmentCategories).map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+              </Field>
+              <Field
+                label="Size or model group"
+                value={bulk.size}
+                onChange={(value) => setBulk({ ...bulk, size: value })}
+              />
+              <Field
+                label="Asset code prefix"
+                value={bulk.prefix}
+                onChange={(value) => setBulk({ ...bulk, prefix: value })}
+              />
+              <Field
+                label="Starting number"
+                type="number"
+                min={1}
+                value={bulk.start}
+                onChange={(value) => setBulk({ ...bulk, start: Number(value) })}
+              />
+              <Field
+                label="Number of assets"
+                type="number"
+                min={1}
+                max={100}
+                value={bulk.count}
+                onChange={(value) => setBulk({ ...bulk, count: Number(value) })}
+              />
+              <Field
+                label="Brand"
+                value={bulk.brand}
+                onChange={(value) => setBulk({ ...bulk, brand: value })}
+              />
+              <Field
+                label="Model"
+                value={bulk.model}
+                onChange={(value) => setBulk({ ...bulk, model: value })}
+              />
+            </div>
+            <button>Review and create sequential assets</button>
+          </form>
+        </details>
+      )}
       <details className="panel">
         <summary>Participants & equipment requirements</summary>
         {state.bookings
@@ -395,49 +559,72 @@ export function Equipment() {
             )),
           )}
       </details>
-      <div className="ops-columns inventory-columns">
-        <section className="panel">
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Asset</th>
-                  <th>Size</th>
-                  <th>Status</th>
-                  <th>Open</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((i) => (
-                  <tr key={i.id}>
-                    <td>
-                      <strong>{i.category}</strong>
-                      <small>{i.id}</small>
-                    </td>
-                    <td>{i.size}</td>
-                    <td>
-                      <Badge>{i.status}</Badge>
-                    </td>
-                    <td>
-                      <button
-                        className="small secondary"
-                        aria-label={`Manage ${i.id}`}
-                        onClick={() => setSelected(i.id)}
-                      >
-                        Manage
-                      </button>
-                    </td>
+      {showAssets && (
+        <div className="ops-columns inventory-columns">
+          <section className="panel">
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Asset</th>
+                    <th>Size</th>
+                    <th>Status</th>
+                    <th>Open</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {!rows.length && <p>No matching inventory.</p>}
-        </section>
-        {item && (
-          <AssetPanel key={`${item.id}-${item.updatedAt}`} item={item} />
-        )}
-      </div>
+                </thead>
+                <tbody>
+                  {visible.map((i) => (
+                    <tr key={i.id}>
+                      <td>
+                        <strong>{i.category}</strong>
+                        <small>{i.id}</small>
+                      </td>
+                      <td>{i.size}</td>
+                      <td>
+                        <Badge>{itemOperationalStatus(state, i)}</Badge>
+                      </td>
+                      <td>
+                        <button
+                          className="small secondary"
+                          aria-label={`Manage ${i.id}`}
+                          onClick={() => setSelected(i.id)}
+                        >
+                          Manage
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!rows.length && <p>No matching inventory.</p>}
+            {rows.length > pageSize && (
+              <div className="pagination" aria-label="Inventory pages">
+                <button
+                  className="small secondary"
+                  disabled={page === 1}
+                  onClick={() => setPage((value) => value - 1)}
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {page} of {pages} · {rows.length} assets
+                </span>
+                <button
+                  className="small secondary"
+                  disabled={page === pages}
+                  onClick={() => setPage((value) => value + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </section>
+          {item && (
+            <AssetPanel key={`${item.id}-${item.updatedAt}`} item={item} />
+          )}
+        </div>
+      )}
     </main>
   );
 }

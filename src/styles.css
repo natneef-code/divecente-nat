@@ -1108,6 +1108,215 @@ select:focus-visible {
     position: static;
   }
 }
+
+.equipment-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 22px 0;
+}
+.equipment-summary {
+  display: grid;
+  gap: 7px;
+  text-align: left;
+  min-height: 125px;
+  padding: 18px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.equipment-summary strong {
+  font-size: 18px;
+}
+.equipment-summary span,
+.equipment-summary small {
+  color: var(--muted);
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+.month-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 24px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--line);
+}
+.month-weekday {
+  padding: 10px;
+  text-align: center;
+  background: #e9f2ec;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.month-day {
+  min-height: 135px;
+  padding: 8px;
+  background: #fff;
+}
+.month-day.outside {
+  background: #f5f7f5;
+  opacity: 0.72;
+}
+.month-date {
+  width: 30px;
+  min-height: 30px;
+  padding: 0;
+  margin-bottom: 7px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+}
+.month-activity {
+  display: block;
+  padding: 7px;
+  margin: 5px 0;
+  border-left: 3px solid #5e997b;
+  background: #eef6f0;
+  color: var(--ink);
+  font-size: 10px;
+}
+.month-activity.warning {
+  border-color: #b88b43;
+  background: #fff8e9;
+}
+.month-activity.blocked {
+  border-color: #b95b55;
+  background: #fff1f0;
+}
+.month-activity strong,
+.month-activity small {
+  display: block;
+}
+.daily-staff-list,
+.staff-session-list {
+  display: grid;
+  gap: 12px;
+}
+.daily-staff-list > article {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(300px, 1.5fr) auto;
+  gap: 18px;
+  align-items: start;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.staff-session-list > div {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 8px 12px;
+  align-items: center;
+}
+.staff-session-list small {
+  grid-column: 1 / -1;
+}
+.manifest-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 22px;
+  align-items: start;
+  margin-top: 22px;
+}
+.manifest-group {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.passenger-row {
+  display: grid;
+  grid-template-columns: 1fr auto minmax(170px, 0.8fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+}
+.passenger-row small {
+  display: block;
+  color: var(--muted);
+}
+.passenger-row form {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}
+.seat-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+.seat {
+  display: grid;
+  min-height: 68px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f6faf7;
+}
+.seat.assigned {
+  background: #dfeee4;
+  border-color: #6e9f83;
+}
+.seat.unavailable {
+  background: #eee;
+  color: #66736b;
+}
+.seat small {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .calendar-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+  }
+  .calendar-filters .segmented {
+    grid-column: 1 / -1;
+  }
+  .calendar-filters .inline-label {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .calendar-filters .inline-label input,
+  .calendar-filters .inline-label select {
+    width: 100%;
+    max-width: none;
+  }
+  .month-calendar {
+    grid-template-columns: 1fr;
+    background: transparent;
+    border: 0;
+  }
+  .month-weekday {
+    display: none;
+  }
+  .month-day {
+    min-height: auto;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  .month-day.outside,
+  .month-day:not(:has(.month-activity)) {
+    display: none;
+  }
+  .daily-staff-list > article,
+  .manifest-layout,
+  .passenger-row {
+    grid-template-columns: 1fr;
+  }
+  .staff-session-list > div {
+    grid-template-columns: 1fr auto;
+  }
+  .passenger-row form {
+    align-items: stretch;
+  }
+}
 @media (max-width: 520px) {
   .metric-grid,
   .compact-metrics {

@@ -8,6 +8,7 @@ import {
   priceBooking,
   type ParticipantInput,
   canEquip,
+  assignedIds,
 } from "./policies";
 import { syncBookingRecords } from "./records";
 import {
@@ -111,6 +112,15 @@ export function createBooking(
     throw new Error(
       `Not enough places remain. Configured participant capacity is ${capacity}; choose another date.`,
     );
+  const boat = source.boats.find((row) => row.id === activity.boatId);
+  if (
+    boat &&
+    boat.name !== "Shore-based" &&
+    projected + assignedIds(source, activity).length > boat.capacity
+  )
+    throw new Error(
+      `Boat seating would be exceeded. ${boat.name} has ${boat.capacity} passenger and professional seats.`,
+    );
   if (
     projected > source.settings.defaultStaffingRatio &&
     !staffingSummary(source, activity, undefined, projected).ready
@@ -156,6 +166,13 @@ export function createBooking(
   });
   s.activities.find((x) => x.id === activity.id)!.readinessStatus = "Draft";
   syncBookingRecords(s, s.bookings[0]);
+  const manifest = s.boatManifests.find(
+    (row) => row.activityId === activity.id && row.boatId === activity.boatId,
+  );
+  if (manifest && !manifest.bookingIds.includes(id)) {
+    manifest.bookingIds.push(id);
+    manifest.updatedAt = now;
+  }
   event(s, a, id, "Booking created");
   return { state: s, id };
 }
